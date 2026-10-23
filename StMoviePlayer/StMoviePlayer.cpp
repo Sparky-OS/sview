@@ -789,7 +789,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.AudioAlHrtf);
         mySettings->saveParam (params.LastUpdateDay);
         mySettings->saveParam (params.CheckUpdatesDays);
-        mySettings->saveParam (params.SrcStereoFormat);
+        // Input packing lives beside this file's resume position.
         mySettings->saveParam (params.IsShuffle);
         mySettings->saveParam (params.ToLoopSingle);
         mySettings->saveParam (params.AreGlobalMKeys);
@@ -1136,7 +1136,7 @@ bool StMoviePlayer::init() {
     }
 
     // load this parameter AFTER video thread creation
-    mySettings->loadParam(params.SrcStereoFormat);
+    // Input packing is restored per file, not as the next file's default.
 
 #if defined(ST_UPDATES_CHECK)
     // read the current time
@@ -1799,6 +1799,11 @@ void StMoviePlayer::beforeDraw() {
     }
 
     if(myEventLoaded.checkReset()) {
+        std::shared_ptr<StFileNode> aLoadedFile;
+        std::shared_ptr<StStereoParams> aLoadedParams;
+        if(myPlayList->getCurrentFile(aLoadedFile, aLoadedParams)) {
+            params.SrcStereoFormat->setValue(aLoadedParams->InputFormat);
+        }
         doUpdateStateLoaded();
     }
 
@@ -2163,6 +2168,15 @@ void StMoviePlayer::doPanoramaOnOff(const size_t ) {
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
+    std::shared_ptr<StFileNode> aFile;
+    std::shared_ptr<StStereoParams> aFileParams;
+    if(myPlayList->getCurrentFile(aFile, aFileParams)) {
+        if(aFileParams->InputFormat == StFormat(theSrcFormat)) { return; }
+        aFileParams->InputFormat = StFormat(theSrcFormat);
+    } else {
+        myPlayList->changeDefParams().InputFormat = StFormat(theSrcFormat);
+    }
+
     myVideo->setStereoFormat(StFormat(theSrcFormat));
     double aDuration = 0.0;
     double aPts = 0.0;

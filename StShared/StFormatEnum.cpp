@@ -35,6 +35,11 @@ StString st::formatToString(StFormat theFormatEnum) {
         case StFormat_Checkerboard_RL: return "checkerboardRL";
         case StFormat_Quincunx: return "quincunx";
         case StFormat_Quincunx_RL: return "quincunxRL";
+        case StFormat_SeparateFrames: return "separateFrames";
+        case StFormat_AnaglyphRedCyan: return "anaglyphRedCyan";
+        case StFormat_AnaglyphGreenMagenta: return "anaglyphGreenMagenta";
+        case StFormat_AnaglyphYellowBlue: return "anaglyphYellowBlue";
+        case StFormat_Tiled4x: return "tiled4x";
         case StFormat_AUTO:
         default:                     return StFormat_AUTO_STRING;
     }
@@ -48,6 +53,11 @@ StFormat st::formatFromString(const StString& theFormatString) {
     if(theFormatString.isEqualsIgnoreCase(stCString("checkerboardRL"))) { return StFormat_Checkerboard_RL; }
     if(theFormatString.isEqualsIgnoreCase(stCString("quincunx"))) { return StFormat_Quincunx; }
     if(theFormatString.isEqualsIgnoreCase(stCString("quincunxRL"))) { return StFormat_Quincunx_RL; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("separateFrames"))) { return StFormat_SeparateFrames; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("anaglyphRedCyan"))) { return StFormat_AnaglyphRedCyan; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("anaglyphGreenMagenta"))) { return StFormat_AnaglyphGreenMagenta; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("anaglyphYellowBlue"))) { return StFormat_AnaglyphYellowBlue; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("tiled4x"))) { return StFormat_Tiled4x; }
     if(theFormatString.isEqualsIgnoreCase(StFormat_Mono_STRING)) {
         return StFormat_Mono;
     } else if(theFormatString.isEqualsIgnoreCase(StFormat_SideBySide_RL_STRING)) {

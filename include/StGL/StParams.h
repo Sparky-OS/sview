@@ -419,6 +419,8 @@ class StStereoParams {
 
     StViewSurface ViewingMode = StViewSurface_Plain; //!< viewing mode - panorama or flat image
 
+    StFormat      InputFormat = StFormat_AUTO; //!< per-file choice; AUTO keeps detection
+    bool          FileStateLoaded = false;
     GLfloat       Timestamp = 0.0f; //!< playback timestamp
 
     StFormat     StereoFormat = StFormat_Mono; //!< stereoscopic format

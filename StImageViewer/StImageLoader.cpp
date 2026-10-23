@@ -292,7 +292,7 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
     }
 
     StTimer aLoadTimer(true);
-    StFormat  aSrcFormatCurr = myStFormatByUser;
+    StFormat  aSrcFormatCurr = theParams->InputFormat;
     StPanorama aSrcPanorama = StPanorama_OFF;
     if (anImgType == StImageFile::ST_TYPE_MPO
      || anImgType == StImageFile::ST_TYPE_JPEG
@@ -365,7 +365,7 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
                 anEntry.changeValue() = aTime;
             }
         }
-        if (myStFormatByUser == StFormat_AUTO) {
+        if (theParams->InputFormat == StFormat_AUTO) {
             if (aParser.getSrcFormat() != StFormat_AUTO) {
                 aSrcFormatCurr = aParser.getSrcFormat();
             } else if (anImg1.get() != nullptr && anImg2.get() == nullptr
@@ -458,7 +458,7 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
 
         aSrcPanorama = anImageFileL->getPanoramaFormat();
         anImgInfo->StInfoStream = anImageFileL->getFormat();
-        if (myStFormatByUser == StFormat_AUTO) {
+        if (theParams->InputFormat == StFormat_AUTO) {
             aSrcFormatCurr = anImgInfo->StInfoStream;
         }
     }

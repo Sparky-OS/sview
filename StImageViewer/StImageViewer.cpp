@@ -482,7 +482,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ToShowPlayList);
         mySettings->saveParam (params.ToShowAdjustImage);
         if(myToSaveSrcFormat) {
-            mySettings->saveParam(params.SrcStereoFormat);
+            // Input packing lives beside this file's resume position.
         }
 
         // store hot-keys
@@ -512,6 +512,8 @@ void StImageViewer::saveAllParams() {
         aLastR.clear();
     }
 
+    mySettings->saveString("recent", (params.ToSaveRecent->getValue() || params.ToOpenLast->getValue())
+        ? myPlayList->dumpRecentList() : StString());
     mySettings->saveString(ST_SETTING_RECENT_L, aLastL);
     mySettings->saveString(ST_SETTING_RECENT_R, aLastR);
     mySettings->flush();
@@ -669,7 +671,10 @@ bool StImageViewer::init() {
     myLoader->setCompressMemory(myWindow->isMobile());
 
     // load this parameter AFTER image thread creation
-    mySettings->loadParam(params.SrcStereoFormat);
+    StString aRecentList;
+    mySettings->loadString("recent", aRecentList);
+    myPlayList->loadRecentList(aRecentList);
+    // Input packing is restored per file, not as the next file's default.
 
 #if defined(ST_UPDATES_CHECK)
     // read the current time
@@ -1203,6 +1208,11 @@ void StImageViewer::beforeDraw() {
     }
 
     if(myEventLoaded.checkReset()) {
+        std::shared_ptr<StFileNode> aLoadedFile;
+        std::shared_ptr<StStereoParams> aLoadedParams;
+        if(myPlayList->getCurrentFile(aLoadedFile, aLoadedParams)) {
+            params.SrcStereoFormat->setValue(aLoadedParams->InputFormat);
+        }
         doUpdateStateLoaded();
     }
 
@@ -1310,6 +1320,15 @@ void StImageViewer::doScaleHiDPI(const bool ) {
 }
 
 void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
+    std::shared_ptr<StFileNode> aFile;
+    std::shared_ptr<StStereoParams> aFileParams;
+    if(myPlayList->getCurrentFile(aFile, aFileParams)) {
+        if(aFileParams->InputFormat == StFormat(theSrcFormat)) { return; }
+        aFileParams->InputFormat = StFormat(theSrcFormat);
+    } else {
+        myPlayList->changeDefParams().InputFormat = StFormat(theSrcFormat);
+    }
+
     if (myLoader.get() == nullptr) {
         return;
     }

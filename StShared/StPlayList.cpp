@@ -505,6 +505,8 @@ void StPlayList::setTitle(const std::shared_ptr<StStereoParams>& theKey,
     signals.onTitleChange(anItemId);
 }
 
+namespace { ST_LOCAL bool stAreSameRecent(const StFileNode& theLeft, const StFileNode& theRight); }
+
 bool StPlayList::getCurrentFile(std::shared_ptr<StFileNode>& theFileNode,
                                 std::shared_ptr<StStereoParams>& theParams,
                                 std::shared_ptr<StFileNode>& thePlsFile) {
@@ -524,6 +526,18 @@ bool StPlayList::getCurrentFile(std::shared_ptr<StFileNode>& theFileNode,
 
     theFileNode = aFileNode->detach();
     theParams   = myCurrent->getParams();
+    if(!theParams->FileStateLoaded) {
+        for(const std::shared_ptr<StRecentItem>& aRecent : myRecent) {
+            if(stAreSameRecent(*aFileNode, *aRecent->File) && aRecent->Params.get() != nullptr) {
+                theParams->InputFormat = aRecent->Params->InputFormat;
+                theParams->ToSwapLR = aRecent->Params->ToSwapLR;
+                theParams->Timestamp = aRecent->Params->Timestamp;
+                break;
+            }
+        }
+        theParams->FileStateLoaded = true;
+        addRecentFile(*aFileNode)->Params = theParams;
+    }
     if (myPlsFile.get() != nullptr) {
         thePlsFile = myPlsFile->File;
     }
@@ -896,10 +910,12 @@ void StPlayList::currentToRecent() {
 
 const std::shared_ptr<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFileNode& theFile,
                                                                            const bool        theToFront) {
+    std::shared_ptr<StStereoParams> aSavedParams;
     // remove duplicates
     for (size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
         const std::shared_ptr<StRecentItem>& aRecent = myRecent[anIter];
         if (stAreSameRecent(theFile, *aRecent->File)) {
+            aSavedParams = aRecent->Params;
             myRecent.erase(myRecent.begin() + anIter);
             break;
         }
@@ -910,6 +926,7 @@ const std::shared_ptr<StPlayList::StRecentItem>& StPlayList::addRecentFile(const
     }
 
     std::shared_ptr<StRecentItem> aNewRecent = std::make_shared<StRecentItem>();
+    aNewRecent->Params = aSavedParams;
     const StString aPath = theFile.getPath();
     if (StFileNode::isContentProtocolPath(aPath)) {
         // ignore temporary URLs
@@ -955,6 +972,8 @@ StString StPlayList::dumpRecentList() const {
             aMap.add(anArgRight);
         }
         if (aParams.get() != nullptr) {
+            aMap.add(StArgument(StString("packing") + anIter, st::formatToString(aParams->InputFormat)));
+            aMap.add(StArgument(StString("swap") + anIter, aParams->ToSwapLR ? "1" : "0"));
             if(aParams->Timestamp > 360.0) {
                 std::stringstream aStream;
                 aStream.imbue(std::locale("C"));
@@ -997,6 +1016,11 @@ void StPlayList::loadRecentList(const StString theString) {
             continue;
         }
 
+        if(aRecent->Params.get() == nullptr) { aRecent->Params = std::make_shared<StStereoParams>(); }
+        const StArgument aPacking = aMap[StString("packing") + anIter];
+        const StArgument aSwap = aMap[StString("swap") + anIter];
+        if(aPacking.isValid()) { aRecent->Params->InputFormat = st::formatFromString(aPacking.getValue()); }
+        if(aSwap.isValid()) { aRecent->Params->ToSwapLR = aSwap.getValue() == "1"; }
         if(anArgTime.isValid()) {
             if (aRecent->Params.get() == nullptr) {
                 aRecent->Params = std::make_shared<StStereoParams>();

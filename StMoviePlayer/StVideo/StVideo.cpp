@@ -585,6 +585,7 @@ bool StVideo::openSource(const std::shared_ptr<StFileNode>&     theNewSource,
                          const std::shared_ptr<StFileNode>&     theNewPlsFile) {
     // just for safe - close previously opened video
     close();
+    setStereoFormat(theNewParams->InputFormat);
 
     const bool toUseGpu      = params.UseGpu->getValue();
     const bool toUseOpenJpeg = params.UseOpenJpeg->getValue();
