@@ -1130,9 +1130,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 }
             }
 
-            if(myRoot->isFlatStereo()) {
-                aDispRatio = float(myFrameSize.x()) / float(myFrameSize.y());
-            }
             GLfloat  aRectRatio  = GLfloat(aFrameRectPx.ratio());
             StGLVec2 aRatioScale = aParams->getRatioScale(aRectRatio, aDispRatio);
             aModelMat.scale(aRatioScale.x(), aRatioScale.y(), 1.0f);

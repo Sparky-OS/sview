@@ -134,6 +134,14 @@ void StWindow::setCompositorViewSize(int theWidth, int theHeight, double thePixe
     }
 }
 
+StGLBoxPx StWindow::stglUiViewport() const {
+    StGLBoxPx aViewport = stglViewport(ST_WIN_MASTER);
+    if(myWin->myHasStereoDeclaration) {
+        aViewport.width() = int(aViewport.width() * myWin->myCompositorPixelRatio + 0.5);
+    }
+    return aViewport;
+}
+
 bool StWindow::isCompositorStereo() const {
     return myWin->myHasStereoDeclaration;
 }
@@ -391,7 +399,8 @@ double StWindow::stglAspectRatio() const {
     }
 
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
-    return double(aVPMaster.width() != 0 ? aVPMaster.width() : 1) / double(aVPMaster.height() != 0 ? aVPMaster.height() : 1);
+    return double(aVPMaster.width() != 0 ? aVPMaster.width() : 1) / double(aVPMaster.height() != 0 ? aVPMaster.height() : 1)
+         * (myWin->myHasStereoDeclaration ? myWin->myCompositorPixelRatio : 1.0);
 }
 
 void StWindow::setForcedAspect(double theAspect) {

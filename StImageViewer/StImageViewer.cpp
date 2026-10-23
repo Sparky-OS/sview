@@ -599,7 +599,7 @@ bool StImageViewer::createGui() {
     } else {
         myGUI->changeCamera()->resetCustomProjection();
     }
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
+    myGUI->stglResize(myWindow->stglUiViewport(), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 
     for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
         StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
@@ -883,7 +883,7 @@ void StImageViewer::doResize(const StSizeEvent& ) {
         } else {
             myGUI->changeCamera()->resetCustomProjection();
         }
-        myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
+        myGUI->stglResize(myWindow->stglUiViewport(), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
     }
 }
 

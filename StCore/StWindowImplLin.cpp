@@ -805,14 +805,28 @@ void StWindowImpl::parseXDNDSelectionMsg() {
 #ifdef ST_HAVE_STEREO_KWIN
 bool StWindowImpl::prepareCompositorFrame() {
     Display* aDisplay = myMaster.stXDisplay->hDisplay;
-    if(myCompositorWidth > 0 && (myRectNorm.width() != myCompositorWidth || myRectNorm.height() != myCompositorHeight)) {
-        myRectNorm.right() = myRectNorm.left() + myCompositorWidth;
-        myRectNorm.bottom() = myRectNorm.top() + myCompositorHeight;
+    int aWidth = myCompositorWidth, aHeight = myCompositorHeight;
+    if(attribs.IsFullScreen && aWidth > 0) {
+        const StRectI_t& aScreen = myMonitors[myRectNorm.center()].getVRect();
+        const double anAspect = double(aScreen.width()) / aScreen.height() / myCompositorPixelRatio;
+        aWidth = stMax(aWidth, int(std::ceil(myCompositorHeight * anAspect)));
+        aHeight = stMax(aHeight, int(std::ceil(myCompositorWidth / anAspect)));
+    }
+    if(aWidth > 0 && (myRectNorm.width() != aWidth || myRectNorm.height() != aHeight)) {
+        myRectNorm.right() = myRectNorm.left() + aWidth;
+        myRectNorm.bottom() = myRectNorm.top() + aHeight;
         myRectFull = myRectNorm;
         const int aDisplayHeight = stMax(1, int(myCompositorDisplayWidth * double(myCompositorHeight)
                                               / (myCompositorWidth * myCompositorPixelRatio)));
-        stereo_declare_x11_one_view_size(aDisplay, myMaster.hWindow, myCompositorDisplayWidth, aDisplayHeight);
-        XResizeWindow(aDisplay, myMaster.hWindow, myCompositorWidth, myCompositorHeight);
+        if(!attribs.IsFullScreen) {
+            stereo_declare_x11_one_view_size(aDisplay, myMaster.hWindow, myCompositorDisplayWidth, aDisplayHeight);
+        }
+        XSizeHints aHints = {};
+        aHints.flags = PAspect;
+        aHints.min_aspect.x = aHints.max_aspect.x = int(myCompositorWidth * myCompositorPixelRatio + 0.5);
+        aHints.min_aspect.y = aHints.max_aspect.y = myCompositorHeight;
+        XSetWMNormalHints(aDisplay, myMaster.hWindow, &aHints);
+        XResizeWindow(aDisplay, myMaster.hWindow, aWidth, aHeight);
         updateWindowPos();
         XFlush(aDisplay);
     }

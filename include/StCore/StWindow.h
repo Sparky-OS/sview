@@ -417,6 +417,7 @@ class StWindow {
     ST_CPPEXPORT void setCompositorStereo(bool theEnable);
     ST_CPPEXPORT bool isCompositorStereo() const;
     ST_CPPEXPORT void setCompositorViewSize(int theWidth, int theHeight, double thePixelRatio);
+    ST_CPPEXPORT StGLBoxPx stglUiViewport() const;
 
     /**
      * @param theStereoState enable/disable stereooutput
