@@ -1,0 +1,10 @@
+sview (26.9+stereo3d1) UNRELEASED; urgency=medium
+
+  * Add an optional full side-by-side XWayland renderer using
+    libstereo-declare 1.6 and the shared one-view place handshake.
+  * Decode column, checkerboard and quincunx input layouts explicitly.
+  * Keep per-file input packing and eye swap with the recent-file state.
+  * Draw controls at zero depth in both views and preserve native samples.
+  * Enable the edition renderer in this package and run its tests.
+
+ -- Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>  Fri, 23 Oct 2026 22:05:00 +0000
