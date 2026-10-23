@@ -220,7 +220,11 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
     params.ToUseDeepColor->setValue(false);
 #endif
     params.ToOpenLast   = new StBoolParamNamed(false, stCString("toOpenLast"));
+#ifdef ST_HAVE_STEREO_KWIN
+    params.ToSaveRecent = new StBoolParamNamed(true, stCString("toSaveRecent"));
+#else
     params.ToSaveRecent = new StBoolParamNamed(false, stCString("toSaveRecent"));
+#endif
     params.imageLib = StImageFile::ST_LIBAV,
     params.TargetFps = new StInt32ParamNamed(0, stCString("fpsTarget"));
     updateStrings();
@@ -512,6 +516,7 @@ void StImageViewer::saveAllParams() {
         aLastR.clear();
     }
 
+    myPlayList->currentToRecent();
     mySettings->saveString("recent", (params.ToSaveRecent->getValue() || params.ToOpenLast->getValue())
         ? myPlayList->dumpRecentList() : StString());
     mySettings->saveString(ST_SETTING_RECENT_L, aLastL);
