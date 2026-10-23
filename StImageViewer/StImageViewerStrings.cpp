@@ -83,6 +83,13 @@ void loadDefaults(StLangMap& theStrings) {
                "Over/Under (R/L)");
     theStrings(MENU_SRC_FORMAT_OVERUNDER_LR,
                "Over/Under (L/R)");
+    theStrings(MENU_SRC_FORMAT_COLUMNS, "Columns (L/R)");
+    theStrings(MENU_SRC_FORMAT_COLUMNS_RL, "Columns (R/L)");
+    theStrings(MENU_SRC_FORMAT_ROWS_RL, "Rows (R/L)");
+    theStrings(MENU_SRC_FORMAT_CHECKERBOARD, "Checkerboard (L/R)");
+    theStrings(MENU_SRC_FORMAT_CHECKERBOARD_RL, "Checkerboard (R/L)");
+    theStrings(MENU_SRC_FORMAT_QUINCUNX, "Quincunx (L/R)");
+    theStrings(MENU_SRC_FORMAT_QUINCUNX_RL, "Quincunx (R/L)");
     theStrings(MENU_SRC_FORMAT_INTERLACED,
                "Interlaced");
     theStrings(MENU_SRC_FORMAT_ANA_RC,

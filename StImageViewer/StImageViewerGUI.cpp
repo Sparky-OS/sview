@@ -312,6 +312,13 @@ void StImageViewerGUI::fillSrcFormatMenu(StGLMenu* theMenu) {
            ->setIcon(stCMenuIcon("menuOverUnderLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.SrcStereoFormat, StFormat_TopBottom_RL)
            ->setIcon(stCMenuIcon("menuOverUnderRL"));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_COLUMNS), myPlugin->params.SrcStereoFormat, StFormat_Columns);
+    theMenu->addItem(tr(MENU_SRC_FORMAT_COLUMNS_RL), myPlugin->params.SrcStereoFormat, StFormat_Columns_RL);
+    theMenu->addItem(tr(MENU_SRC_FORMAT_ROWS_RL), myPlugin->params.SrcStereoFormat, StFormat_Rows_RL);
+    theMenu->addItem(tr(MENU_SRC_FORMAT_CHECKERBOARD), myPlugin->params.SrcStereoFormat, StFormat_Checkerboard);
+    theMenu->addItem(tr(MENU_SRC_FORMAT_CHECKERBOARD_RL), myPlugin->params.SrcStereoFormat, StFormat_Checkerboard_RL);
+    theMenu->addItem(tr(MENU_SRC_FORMAT_QUINCUNX), myPlugin->params.SrcStereoFormat, StFormat_Quincunx);
+    theMenu->addItem(tr(MENU_SRC_FORMAT_QUINCUNX_RL), myPlugin->params.SrcStereoFormat, StFormat_Quincunx_RL);
     theMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.SrcStereoFormat, StFormat_Rows)
            ->setIcon(stCMenuIcon("menuRowLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.SrcStereoFormat, StFormat_AnaglyphRedCyan)
@@ -1352,6 +1359,13 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
         case StFormat_SideBySide_RL:        return MENU_SRC_FORMAT_CROSS_EYED;
         case StFormat_TopBottom_LR:         return MENU_SRC_FORMAT_OVERUNDER_LR;
         case StFormat_TopBottom_RL:         return MENU_SRC_FORMAT_OVERUNDER_RL;
+        case StFormat_Columns: return MENU_SRC_FORMAT_COLUMNS;
+        case StFormat_Columns_RL: return MENU_SRC_FORMAT_COLUMNS_RL;
+        case StFormat_Rows_RL: return MENU_SRC_FORMAT_ROWS_RL;
+        case StFormat_Checkerboard: return MENU_SRC_FORMAT_CHECKERBOARD;
+        case StFormat_Checkerboard_RL: return MENU_SRC_FORMAT_CHECKERBOARD_RL;
+        case StFormat_Quincunx: return MENU_SRC_FORMAT_QUINCUNX;
+        case StFormat_Quincunx_RL: return MENU_SRC_FORMAT_QUINCUNX_RL;
         case StFormat_Rows:                 return MENU_SRC_FORMAT_INTERLACED;
         case StFormat_AnaglyphGreenMagenta: return MENU_SRC_FORMAT_ANA_RB;
         case StFormat_AnaglyphRedCyan:      return MENU_SRC_FORMAT_ANA_RC;
