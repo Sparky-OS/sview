@@ -350,6 +350,13 @@ class StWindowImpl {
 #endif
 
     bool               myToResetDevice;   //!< indicate device lost state
+    ST_LOCAL bool prepareCompositorFrame();
+    int                myCompositorWidth = 0;
+    int                myCompositorHeight = 0;
+    double             myCompositorPixelRatio = 1.0;
+    int                myCompositorDisplayWidth = 0;
+    bool               myUseStereoCompositor = false;
+    bool               myHasStereoDeclaration = false;
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
     bool               myIsPaused;        //!< window is in background

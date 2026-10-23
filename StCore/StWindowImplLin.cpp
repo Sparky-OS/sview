@@ -14,6 +14,9 @@
 #include <StThreads/StProcess.h>
 #include <StGL/StGLContext.h>
 
+#ifdef ST_HAVE_STEREO_KWIN
+#include <stereo-declare.h>
+#endif
 #include <X11/extensions/Xrandr.h>
 #include <X11/xpm.h>
 
@@ -273,9 +276,21 @@ bool StWindowImpl::create() {
         }
     }
 
+#ifdef ST_HAVE_STEREO_KWIN
+    myHasStereoDeclaration = false;
+    myCompositorDisplayWidth = myRectNorm.width();
+    if(myUseStereoCompositor && myMaster.hWindow != 0 && stereo_supported_x11(hDisplay) >= 6) {
+        myHasStereoDeclaration = stereo_declare_x11(hDisplay, myMaster.hWindow,
+            STEREO_SBS_FULL, STEREO_CLASS_VIDEO, STEREO_VIDEO_CURRENT) == 0
+            && stereo_declare_x11_one_view_size(hDisplay, myMaster.hWindow,
+                myRectNorm.width(), myRectNorm.height()) == 0;
+        if(!myHasStereoDeclaration) { stereo_remove_x11(hDisplay, myMaster.hWindow); }
+    }
+#endif
+
     aWinAttribsX.override_redirect = True; // GL window always undecorated
     myMaster.hWindowGl = XCreateWindow(hDisplay, (aParentWin != 0) ? aParentWin : stXDisplay->getRootWindow(),
-                                       0, 0, myRectNorm.width(), myRectNorm.height(),
+                                       0, 0, myRectNorm.width() * (myHasStereoDeclaration ? 2 : 1), myRectNorm.height(),
                                        0, stXDisplay->getDepth(),
                                        InputOutput,
                                        stXDisplay->getVisual(),
@@ -451,6 +466,21 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     }
 
     Display* hDisplay = myMaster.stXDisplay->hDisplay;
+    if(myUseStereoCompositor && myMaster.hWindow != 0) {
+        XEvent anEvent = {};
+        anEvent.xclient.type = ClientMessage;
+        anEvent.xclient.window = myMaster.hWindow;
+        anEvent.xclient.message_type = XInternAtom(hDisplay, "_NET_WM_STATE", False);
+        anEvent.xclient.format = 32;
+        anEvent.xclient.data.l[0] = theFullscreen ? 1 : 0;
+        anEvent.xclient.data.l[1] = XInternAtom(hDisplay, "_NET_WM_STATE_FULLSCREEN", False);
+        anEvent.xclient.data.l[3] = 1;
+        XSendEvent(hDisplay, myMaster.stXDisplay->getRootWindow(), False,
+            SubstructureRedirectMask | SubstructureNotifyMask, &anEvent);
+        XFlush(hDisplay);
+        myRectFull = myRectNorm;
+        return;
+    }
     if(attribs.IsFullScreen) {
         const StMonitor& stMon = (myMonMasterFull == -1) ? myMonitors[myRectNorm.center()] : myMonitors[myMonMasterFull];
         myRectFull = stMon.getVRect();
@@ -601,7 +631,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
             XFlush(hDisplay);
             XMoveResizeWindow(hDisplay, myMaster.hWindowGl,
                               myRectNorm.left(),  myRectNorm.top(),
-                              myRectNorm.width(), myRectNorm.height());
+                              myRectNorm.width() * (myHasStereoDeclaration ? 2 : 1), myRectNorm.height());
         }
     }
     const Window aFocusWin = myMaster.hWindow != 0 ? myMaster.hWindow : myMaster.hWindowGl;
@@ -772,13 +802,34 @@ void StWindowImpl::parseXDNDSelectionMsg() {
     }
 }
 
+#ifdef ST_HAVE_STEREO_KWIN
+bool StWindowImpl::prepareCompositorFrame() {
+    Display* aDisplay = myMaster.stXDisplay->hDisplay;
+    if(myCompositorWidth > 0 && (myRectNorm.width() != myCompositorWidth || myRectNorm.height() != myCompositorHeight)) {
+        myRectNorm.right() = myRectNorm.left() + myCompositorWidth;
+        myRectNorm.bottom() = myRectNorm.top() + myCompositorHeight;
+        myRectFull = myRectNorm;
+        const int aDisplayHeight = stMax(1, int(myCompositorDisplayWidth * double(myCompositorHeight)
+                                              / (myCompositorWidth * myCompositorPixelRatio)));
+        stereo_declare_x11_one_view_size(aDisplay, myMaster.hWindow, myCompositorDisplayWidth, aDisplayHeight);
+        XResizeWindow(aDisplay, myMaster.hWindow, myCompositorWidth, myCompositorHeight);
+        updateWindowPos();
+        XFlush(aDisplay);
+    }
+    // A mapped parent can still be waiting for KWin to allocate both views.
+    XWindowAttributes aParent = {};
+    XGetWindowAttributes(aDisplay, myMaster.hWindow, &aParent);
+    return aParent.width == 2 * myRectNorm.width() && aParent.height == myRectNorm.height();
+}
+#endif
+
 void StWindowImpl::updateWindowPos() {
     const StXDisplayH& aDisplay = myMaster.stXDisplay;
     if(aDisplay.isNull() || myMaster.hWindowGl == 0) {
         return;
     }
 
-    if(!attribs.IsFullScreen) {
+    if(!attribs.IsFullScreen || myUseStereoCompositor) {
         if(myRectNorm.left() == 0 && myRectNorm.top() == 0 && myMaster.hWindow != 0) {
             int width  = myRectNorm.width();
             int height = myRectNorm.height();
@@ -792,7 +843,7 @@ void StWindowImpl::updateWindowPos() {
         if(myMaster.hWindow != 0) {
             XMoveResizeWindow(aDisplay->hDisplay, myMaster.hWindowGl,
                               0, 0,
-                              myRectNorm.width(), myRectNorm.height());
+                              myRectNorm.width() * (myHasStereoDeclaration ? 2 : 1), myRectNorm.height());
         }
         if(attribs.Slave != StWinSlave_slaveOff) {
             XMoveResizeWindow(aDisplay->hDisplay, mySlave.hWindowGl,
@@ -1033,7 +1084,8 @@ void StWindowImpl::processEvents() {
             case ConfigureNotify: {
                 //ST_DEBUG_LOG("ConfigureNotify");
                 const XConfigureEvent* aCfgEvent = &myXEvent.xconfigure;
-                if(!attribs.IsFullScreen && aCfgEvent->window == myMaster.hWindow) {
+                if(myHasStereoDeclaration && !aCfgEvent->send_event) { break; }
+                if((!attribs.IsFullScreen || myUseStereoCompositor) && aCfgEvent->window == myMaster.hWindow) {
                     StRectI_t aNewRect;
                     if(aCfgEvent->x > 64 && aCfgEvent->y > 64) {
                         // we got real GLorigin position
@@ -1057,6 +1109,7 @@ void StWindowImpl::processEvents() {
                     if(myRectNorm != aNewRect) {
                         // new compiz send messages when placement not really changed
                         myRectNorm  = aNewRect;
+                        if(myUseStereoCompositor) { myRectFull = aNewRect; }
                         myIsUpdated = true; // call updateWindowPos() to update position
                     }
                 }

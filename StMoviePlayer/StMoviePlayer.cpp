@@ -17,6 +17,9 @@
  */
 
 #include "StMoviePlayer.h"
+#ifdef ST_HAVE_STEREO_KWIN
+#include "../StOutStereoKWin/StOutStereoKWin.h"
+#endif
 
 #include "StALDeviceParam.h"
 #include "StMovieOpenDialog.h"
@@ -484,6 +487,9 @@ StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
 #else
+#ifdef ST_HAVE_STEREO_KWIN
+    addRenderer(std::make_shared<StOutStereoKWin>(myResMgr, theParentWin));
+#endif
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDual>       (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutIZ3D>       (myResMgr, theParentWin));
@@ -1970,8 +1976,13 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
         return;
     }
 
-    myGUI->changeCamera()->setView(theView);
+    myGUI->setFlatStereo(myWindow->isCompositorStereo());
+    myGUI->changeCamera()->setView(myWindow->isCompositorStereo() ? ST_DRAW_MONO : theView);
     myGUI->stglDraw(theView);
+    if(myWindow->isCompositorStereo() && myGUI->myImage->params.ViewMode->getValue() == StViewSurface_Plain) {
+        const StVec2<int>& aSize = myGUI->myImage->getFrameSize();
+        myWindow->setCompositorViewSize(aSize.x(), aSize.y(), myGUI->myImage->getSampleRatio());
+    }
 }
 
 void StMoviePlayer::doShowPlayList(const bool theToShow) {

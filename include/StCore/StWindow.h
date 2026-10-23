@@ -413,6 +413,11 @@ class StWindow {
      */
     ST_CPPEXPORT bool isStereoOutput() const;
 
+    // Explicit compositor output uses a normal GLX visual, not Mesa quad buffers.
+    ST_CPPEXPORT void setCompositorStereo(bool theEnable);
+    ST_CPPEXPORT bool isCompositorStereo() const;
+    ST_CPPEXPORT void setCompositorViewSize(int theWidth, int theHeight, double thePixelRatio);
+
     /**
      * @param theStereoState enable/disable stereooutput
      */

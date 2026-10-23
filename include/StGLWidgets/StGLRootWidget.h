@@ -417,6 +417,10 @@ class StGLRootWidget : public StGLWidget {
         return myScrDispX;
     }
 
+    ST_LOCAL void setFlatStereo(bool theFlat) { myIsFlatStereo = theFlat; }
+    ST_LOCAL bool isFlatStereo() const { return myIsFlatStereo; }
+    ST_LOCAL unsigned int mediaView() const { return myMediaView; }
+
     inline void setLensDist(const GLfloat theLensDist) {
         myLensDist = theLensDist;
     }
@@ -523,6 +527,8 @@ class StGLRootWidget : public StGLWidget {
     std::shared_ptr<StGLFontManager> myGlFontMgr; //!< shared font manager
     std::shared_ptr<StGLContext>     myGlCtx;     //!< OpenGL context
 
+    unsigned int myMediaView = ST_DRAW_MONO;
+    bool myIsFlatStereo = false;
     GLfloat myScrDispX = 0.0f;
     GLfloat myLensDist = 0.0f;
     int     myScrDispXPx = 0;

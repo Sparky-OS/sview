@@ -406,11 +406,24 @@ function (sview_set_target_output_dirs theTarget)
 endfunction()
 
 # core libraries
+option(USE_STEREO_KWIN "Default to declared full side-by-side on Stereo KWin" OFF)
+if (USE_STEREO_KWIN)
+  if (NOT USE_XLIB)
+    message(FATAL_ERROR "Stereo KWin output requires X11/XWayland")
+  endif()
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(STEREO_DECLARE REQUIRED IMPORTED_TARGET stereo-declare>=1.4.0)
+  add_compile_definitions(ST_HAVE_STEREO_KWIN)
+endif()
+
 add_subdirectory(StShared)
 add_subdirectory(StCore)
 add_subdirectory(StGLWidgets)
 
 # outputs
+if (USE_STEREO_KWIN)
+  add_subdirectory(StOutStereoKWin)
+endif()
 add_subdirectory(StOutAnaglyph)
 add_subdirectory(StOutDistorted)
 add_subdirectory(StOutDual)

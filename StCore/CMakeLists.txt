@@ -92,3 +92,7 @@ endif()
 if (USE_LIBCONFIG)
   target_link_libraries (${PROJECT_NAME} PRIVATE libconfig++)
 endif()
+
+if (USE_STEREO_KWIN)
+  target_link_libraries(StCore PRIVATE PkgConfig::STEREO_DECLARE)
+endif()

@@ -17,6 +17,9 @@
  */
 
 #include "StImageViewer.h"
+#ifdef ST_HAVE_STEREO_KWIN
+#include "../StOutStereoKWin/StOutStereoKWin.h"
+#endif
 
 #include "StImageOpenDialog.h"
 #include "StImageViewerStrings.h"
@@ -258,6 +261,9 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
 #else
+#ifdef ST_HAVE_STEREO_KWIN
+    addRenderer(std::make_shared<StOutStereoKWin>(myResMgr, theParentWin));
+#endif
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDual>       (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutIZ3D>       (myResMgr, theParentWin));
@@ -1247,7 +1253,8 @@ void StImageViewer::stglDraw(unsigned int theView) {
         return;
     }
 
-    myGUI->changeCamera()->setView(theView);
+    myGUI->setFlatStereo(myWindow->isCompositorStereo());
+    myGUI->changeCamera()->setView(myWindow->isCompositorStereo() ? ST_DRAW_MONO : theView);
     if(theView == ST_DRAW_LEFT
     || theView == ST_DRAW_MONO) {
         if(!myWindow->isActive()) {
@@ -1270,6 +1277,10 @@ void StImageViewer::stglDraw(unsigned int theView) {
 
     // draw GUI
     myGUI->stglDraw(theView);
+    if(myWindow->isCompositorStereo() && myGUI->myImage->params.ViewMode->getValue() == StViewSurface_Plain) {
+        const StVec2<int>& aSize = myGUI->myImage->getFrameSize();
+        myWindow->setCompositorViewSize(aSize.x(), aSize.y(), myGUI->myImage->getSampleRatio());
+    }
 }
 
 void StImageViewer::doScaleGui(const int32_t ) {

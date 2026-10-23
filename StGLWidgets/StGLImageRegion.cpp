@@ -727,6 +727,8 @@ bool StGLImageRegion::getHeadOrientation(StGLQuaternion& theOrient,
 }
 
 void StGLImageRegion::stglDraw(unsigned int theView) {
+    const unsigned int aUiView = theView;
+    if(myRoot->isFlatStereo()) { theView = myRoot->mediaView(); }
     myIconPrev->setOpacity(0.0f, false);
     myIconNext->setOpacity(0.0f, false);
     std::shared_ptr<StStereoParams> aParams = getSource();
@@ -739,7 +741,7 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
 
     if(aParams->isMono()) {
         theView = ST_DRAW_MONO;
-        aParams->setSwapLR(false);
+
     }
 
     // copy value for saving image to file;
@@ -764,7 +766,7 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
             stglDrawView(theView);
             break;
     }
-    StGLWidget::stglDraw(theView);
+    StGLWidget::stglDraw(aUiView);
 }
 
 void StGLImageRegion::stglDrawView(unsigned int theView) {
@@ -1128,6 +1130,9 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 }
             }
 
+            if(myRoot->isFlatStereo()) {
+                aDispRatio = float(myFrameSize.x()) / float(myFrameSize.y());
+            }
             GLfloat  aRectRatio  = GLfloat(aFrameRectPx.ratio());
             StGLVec2 aRatioScale = aParams->getRatioScale(aRectRatio, aDispRatio);
             aModelMat.scale(aRatioScale.x(), aRatioScale.y(), 1.0f);

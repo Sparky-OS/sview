@@ -1,0 +1,4 @@
+project(StOutStereoKWin)
+add_library(StOutStereoKWin SHARED StOutStereoKWin.cpp StOutStereoKWin.h)
+sview_set_target_output_dirs(StOutStereoKWin)
+target_link_libraries(StOutStereoKWin PRIVATE StCore StShared)

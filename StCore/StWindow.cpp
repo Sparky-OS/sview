@@ -122,6 +122,22 @@ bool StWindow::isStereoFullscreenOnly() const {
     return false;
 }
 
+void StWindow::setCompositorStereo(bool theEnable) {
+    myWin->myUseStereoCompositor = theEnable;
+}
+
+void StWindow::setCompositorViewSize(int theWidth, int theHeight, double thePixelRatio) {
+    if(theWidth > 0 && theWidth <= 16383 && theHeight > 0 && theHeight <= 32767) {
+        myWin->myCompositorWidth = theWidth;
+        myWin->myCompositorHeight = theHeight;
+        myWin->myCompositorPixelRatio = thePixelRatio;
+    }
+}
+
+bool StWindow::isCompositorStereo() const {
+    return myWin->myHasStereoDeclaration;
+}
+
 bool StWindow::isStereoOutput() const {
     return myIsForcedStereo || myWin->isStereoOutput();
 }
@@ -262,12 +278,27 @@ void StWindow::stglDraw() {
         return;
     }
 
+#ifdef ST_HAVE_STEREO_KWIN
+    if(myWin->myHasStereoDeclaration && !myWin->prepareCompositorFrame()) { return; }
+#endif
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     const GLsizei aHeight = (aVPMaster .height() == 0) ? 1 : aVPMaster .height();
     const StGLBoxPx aRect = {{ aVPMaster.x(), aVPMaster.y(), aVPMaster.width(), aHeight }};
     myWin->myGlContext->stglResizeViewport(aRect);
 
-    signals.onRedraw(ST_DRAW_LEFT);
+    if(myWin->myHasStereoDeclaration) {
+        myWin->myGlContext->stglSetScissorRect(aRect, true);
+        signals.onRedraw(ST_DRAW_LEFT);
+        myWin->myGlContext->stglResetScissorRect();
+        StGLBoxPx aRight = aRect;
+        aRight.x() += aRect.width();
+        myWin->myGlContext->stglResizeViewport(aRight);
+        myWin->myGlContext->stglSetScissorRect(aRight, true);
+        signals.onRedraw(ST_DRAW_RIGHT);
+        myWin->myGlContext->stglResetScissorRect();
+    } else {
+        signals.onRedraw(ST_DRAW_LEFT);
+    }
     stglSwap(ST_WIN_ALL);
 }
 

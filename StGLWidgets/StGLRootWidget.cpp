@@ -245,6 +245,8 @@ bool StGLRootWidget::stglInit() {
 }
 
 void StGLRootWidget::stglDraw(unsigned int theView) {
+    myMediaView = theView;
+    if(myIsFlatStereo) { theView = ST_DRAW_MONO; myProjCamera.setView(ST_DRAW_MONO); }
     myGlCtx->stglSyncState();
     myGlCtx->core20fwd->glGetIntegerv(GL_VIEWPORT, myViewport); // cache viewport
 
