@@ -16,7 +16,8 @@ int main() {
             aPlane.initTrash(StImagePlane::ImgRGB, 16, 8, 52);
             aPlane.setTopDown(isTopDown);
             const bool isVertical = aType == AV_STEREO3D_LINES || aType == AV_STEREO3D_TOPBOTTOM;
-            const size_t aWidth = isVertical ? 16 : 8, aHeight = isVertical ? 4 : 8;
+            const bool isSparse = aType == AV_STEREO3D_CHECKERBOARD || aType == AV_STEREO3D_SIDEBYSIDE_QUINCUNX;
+            const size_t aWidth = isVertical || isSparse ? 16 : 8, aHeight = isVertical ? 4 : 8;
             // Encode each sample with its eye and coordinates in that eye.
             for (size_t y = 0; y < 8; ++y) {
                 for (size_t x = 0; x < 16; ++x) {
@@ -41,8 +42,9 @@ int main() {
                 if (p.isNull() || p.getSizeX() != aWidth || p.getSizeY() != aHeight) { isGood = false; continue; }
                 for (size_t y = 0; y < aHeight; ++y) {
                     for (size_t x = 0; x < aWidth; ++x) {
+                        if(isSparse && (x + y) % 2 != eye) { continue; }
                         const GLubyte* v = p.getData(y, x);
-                        isGood = isGood && v[0] == (eye ? 203 : 37) && v[1] == x + 10 && v[2] == y + 20;
+                        isGood = isGood && v[0] == (eye ? 203 : 37) && v[1] == (isSparse ? x / 2 : x) + 10 && v[2] == y + 20;
                     }
                 }
             }

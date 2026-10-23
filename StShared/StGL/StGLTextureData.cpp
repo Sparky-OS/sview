@@ -107,6 +107,74 @@ static GLubyte* readFromColumns(const StImagePlane& theSrc,
     return theDataPtr + 2 * theLeft.getSizeBytes();
 }
 
+// H.264 D.2.26, Figures D-1 and D-10: the two eyes occupy complementary
+// quincunx grids. Keep transmitted samples and fill only absent positions.
+template<typename T>
+static void reconstructSparsePlane(const StImagePlane& theSrc, StImagePlane& theDst,
+                                   size_t theEye, bool theParallel) {
+    const size_t aWidth = theDst.getSizeX(), aHeight = theDst.getSizeY();
+    const size_t aComponents = theSrc.getSizePixelBytes() / sizeof(T);
+    const auto sample = [&](size_t x, size_t y) {
+        const size_t aRow = theSrc.isTopDown() ? y : aHeight - 1 - y;
+        return theSrc.getData(aRow, theParallel ? theEye * (aWidth / 2) + x / 2 : x);
+    };
+    for(size_t y = 0; y < aHeight; ++y) {
+        for(size_t x = 0; x < aWidth; ++x) {
+            GLubyte* aDst = theDst.changeData(y, x);
+            if((x + y) % 2 == theEye) {
+                stMemCpy(aDst, sample(x, y), theSrc.getSizePixelBytes());
+                continue;
+            }
+            const GLubyte* aNeighbours[4];
+            size_t aCount = 0;
+            if(x > 0)           { aNeighbours[aCount++] = sample(x - 1, y); }
+            if(x + 1 < aWidth)  { aNeighbours[aCount++] = sample(x + 1, y); }
+            if(y > 0)           { aNeighbours[aCount++] = sample(x, y - 1); }
+            if(y + 1 < aHeight) { aNeighbours[aCount++] = sample(x, y + 1); }
+            for(size_t c = 0; c < aComponents; ++c) {
+                double aSum = 0;
+                for(size_t n = 0; n < aCount; ++n) {
+                    T aValue;
+                    stMemCpy(&aValue, aNeighbours[n] + c * sizeof(T), sizeof(T));
+                    aSum += aValue;
+                }
+                const T aValue = T(aSum / aCount);
+                stMemCpy(aDst + c * sizeof(T), &aValue, sizeof(T));
+            }
+        }
+    }
+}
+
+static GLubyte* readFromSparse(const StImagePlane& theSrc, GLubyte* theDataPtr,
+                              StImagePlane& theLeft, StImagePlane& theRight, bool theParallel) {
+    if(theSrc.isNull()) { return theDataPtr; }
+    const size_t aWidth = theParallel ? (theSrc.getSizeX() / 2) * 2 : theSrc.getSizeX();
+    const size_t aStride = getEvenNumber(aWidth * theSrc.getSizePixelBytes());
+    theLeft.initWrapper(theSrc.getFormat(), theDataPtr, aWidth, theSrc.getSizeY(), aStride);
+    theRight.initWrapper(theSrc.getFormat(), theDataPtr + theLeft.getSizeBytes(), aWidth, theSrc.getSizeY(), aStride);
+    for(size_t eye = 0; eye < 2; ++eye) {
+        StImagePlane& aDst = eye == 0 ? theLeft : theRight;
+        switch(theSrc.getFormat()) {
+            case StImagePlane::ImgGray16:
+            case StImagePlane::ImgRGB48:
+            case StImagePlane::ImgRGBA64:
+                reconstructSparsePlane<uint16_t>(theSrc, aDst, eye, theParallel);
+                break;
+            case StImagePlane::ImgGrayF:
+            case StImagePlane::ImgRGBF:
+            case StImagePlane::ImgBGRF:
+            case StImagePlane::ImgRGBAF:
+            case StImagePlane::ImgBGRAF:
+                reconstructSparsePlane<float>(theSrc, aDst, eye, theParallel);
+                break;
+            default:
+                reconstructSparsePlane<GLubyte>(theSrc, aDst, eye, theParallel);
+                break;
+        }
+    }
+    return theDataPtr + 2 * theLeft.getSizeBytes();
+}
+
 static GLubyte* readFromOverUnderLR(const StImagePlane& theSrc,
                                     GLubyte*            theDataPtr,
                                     StImagePlane&       theDataL,
@@ -531,7 +599,9 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
     myDataR.setBufferCounter(NULL);
 
     // reallocate buffer if needed
-    const size_t aNewSizeBytes = computeBufferSize(theDataL) + computeBufferSize(theDataR);
+    const bool isSparse = mySrcFormat == StFormat_Checkerboard || mySrcFormat == StFormat_Checkerboard_RL
+                       || mySrcFormat == StFormat_Quincunx || mySrcFormat == StFormat_Quincunx_RL;
+    const size_t aNewSizeBytes = (isSparse ? 2 : 1) * (computeBufferSize(theDataL) + computeBufferSize(theDataR));
     if(aNewSizeBytes == 0) {
         // invalid data
         myDataPair.nullify();
@@ -546,14 +616,8 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
 
     switch(mySrcFormat) {
         case StFormat_SideBySide_LR:
-        case StFormat_SideBySide_RL:
-        case StFormat_Quincunx:
-        case StFormat_Quincunx_RL: {
-            const bool isLeftFirst = mySrcFormat == StFormat_SideBySide_LR || mySrcFormat == StFormat_Quincunx;
-            if(mySrcFormat == StFormat_Quincunx || mySrcFormat == StFormat_Quincunx_RL) {
-                myDataL.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
-                myDataR.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
-            }
+        case StFormat_SideBySide_RL: {
+            const bool isLeftFirst = mySrcFormat == StFormat_SideBySide_LR;
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromParallel(theDataL.getPlane(aPlaneId), aDataDispl,
@@ -587,18 +651,29 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
             break;
         }
         case StFormat_Columns:
-        case StFormat_Columns_RL:
-        case StFormat_Checkerboard:
-        case StFormat_Checkerboard_RL: {
-            const bool isReversed = mySrcFormat == StFormat_Columns_RL || mySrcFormat == StFormat_Checkerboard_RL;
-            const bool isCheckerboard = mySrcFormat == StFormat_Checkerboard || mySrcFormat == StFormat_Checkerboard_RL;
+        case StFormat_Columns_RL: {
+            const bool isReversed = mySrcFormat == StFormat_Columns_RL;
             myDataL.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
             myDataR.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromColumns(theDataL.getPlane(aPlaneId), aDataDispl,
                     isReversed ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId),
-                    isReversed ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId), isCheckerboard);
+                    isReversed ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId), false);
+            }
+            break;
+        }
+        case StFormat_Checkerboard:
+        case StFormat_Checkerboard_RL:
+        case StFormat_Quincunx:
+        case StFormat_Quincunx_RL: {
+            const bool isReversed = mySrcFormat == StFormat_Checkerboard_RL || mySrcFormat == StFormat_Quincunx_RL;
+            const bool isParallel = mySrcFormat == StFormat_Quincunx || mySrcFormat == StFormat_Quincunx_RL;
+            GLubyte* aDataDispl = myDataPtr;
+            for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                aDataDispl = readFromSparse(theDataL.getPlane(aPlaneId), aDataDispl,
+                    isReversed ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId),
+                    isReversed ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId), isParallel);
             }
             break;
         }
