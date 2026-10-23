@@ -86,6 +86,27 @@ static GLubyte* readFromParallel(const StImagePlane& theSrc,
     return &theDataPtr[2 * theDataL.getSizeBytes()];
 }
 
+// Retain the samples of each eye, including the alternating checkerboard phase.
+static GLubyte* readFromColumns(const StImagePlane& theSrc,
+                                GLubyte* theDataPtr, StImagePlane& theLeft,
+                                StImagePlane& theRight, bool theCheckerboard) {
+    if(theSrc.isNull()) { return theDataPtr; }
+    const size_t aWidth = theSrc.getSizeX() / 2;
+    const size_t aBytes = theSrc.getSizePixelBytes();
+    const size_t aStride = getEvenNumber(aWidth * aBytes);
+    theLeft.initWrapper(theSrc.getFormat(), theDataPtr, aWidth, theSrc.getSizeY(), aStride);
+    theRight.initWrapper(theSrc.getFormat(), theDataPtr + theLeft.getSizeBytes(), aWidth, theSrc.getSizeY(), aStride);
+    for(size_t y = 0; y < theSrc.getSizeY(); ++y) {
+        const size_t aSourceY = theSrc.isTopDown() ? y : theSrc.getSizeY() - 1 - y;
+        const size_t aPhase = theCheckerboard ? y % 2 : 0;
+        for(size_t x = 0; x < aWidth; ++x) {
+            stMemCpy(theLeft.changeData(y, x), theSrc.getData(aSourceY, 2 * x + aPhase), aBytes);
+            stMemCpy(theRight.changeData(y, x), theSrc.getData(aSourceY, 2 * x + (1 - aPhase)), aBytes);
+        }
+    }
+    return theDataPtr + 2 * theLeft.getSizeBytes();
+}
+
 static GLubyte* readFromOverUnderLR(const StImagePlane& theSrc,
                                     GLubyte*            theDataPtr,
                                     StImagePlane&       theDataL,
@@ -463,6 +484,12 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
                 break;
             }
             case StFormat_Columns:
+            case StFormat_Columns_RL:
+            case StFormat_Rows_RL:
+            case StFormat_Checkerboard:
+            case StFormat_Checkerboard_RL:
+            case StFormat_Quincunx:
+            case StFormat_Quincunx_RL:
             case StFormat_Tiled4x: {
                 toCopy = true;
                 break;
@@ -519,12 +546,19 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
 
     switch(mySrcFormat) {
         case StFormat_SideBySide_LR:
-        case StFormat_SideBySide_RL: {
+        case StFormat_SideBySide_RL:
+        case StFormat_Quincunx:
+        case StFormat_Quincunx_RL: {
+            const bool isLeftFirst = mySrcFormat == StFormat_SideBySide_LR || mySrcFormat == StFormat_Quincunx;
+            if(mySrcFormat == StFormat_Quincunx || mySrcFormat == StFormat_Quincunx_RL) {
+                myDataL.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
+                myDataR.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
+            }
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromParallel(theDataL.getPlane(aPlaneId), aDataDispl,
-                                              (mySrcFormat == StFormat_SideBySide_LR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
-                                              (mySrcFormat == StFormat_SideBySide_LR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
+                                              isLeftFirst ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
+                                              isLeftFirst ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
             }
             break;
         }
@@ -538,15 +572,33 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
             }
             break;
         }
-        case StFormat_Rows: {
+        case StFormat_Rows:
+        case StFormat_Rows_RL: {
             myDataL.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
             myDataR.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
             GLubyte* aDataDispl = myDataPtr;
             // TODO (Kirill Gavrilov#9) wrong for yuv420p?
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromRowInterlace(theDataL.getPlane(aPlaneId), aDataDispl,
-                                                  myDataL.changePlane(aPlaneId), myDataR.changePlane(aPlaneId));
+                                                  (mySrcFormat == StFormat_Rows) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
+                                                  (mySrcFormat == StFormat_Rows) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
 
+            }
+            break;
+        }
+        case StFormat_Columns:
+        case StFormat_Columns_RL:
+        case StFormat_Checkerboard:
+        case StFormat_Checkerboard_RL: {
+            const bool isReversed = mySrcFormat == StFormat_Columns_RL || mySrcFormat == StFormat_Checkerboard_RL;
+            const bool isCheckerboard = mySrcFormat == StFormat_Checkerboard || mySrcFormat == StFormat_Checkerboard_RL;
+            myDataL.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
+            myDataR.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
+            GLubyte* aDataDispl = myDataPtr;
+            for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                aDataDispl = readFromColumns(theDataL.getPlane(aPlaneId), aDataDispl,
+                    isReversed ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId),
+                    isReversed ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId), isCheckerboard);
             }
             break;
         }
@@ -574,7 +626,6 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
         case StFormat_AnaglyphRedCyan:
         case StFormat_AnaglyphGreenMagenta:
         case StFormat_AnaglyphYellowBlue:
-        case StFormat_Columns: // not supported
         case StFormat_Mono:
         default: {
             GLubyte* aDataDispl = myDataPtr;

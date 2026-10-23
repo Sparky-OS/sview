@@ -64,3 +64,7 @@ target_link_libraries (${PROJECT_NAME} PRIVATE ${ST_OPENGL_LIBRARIES})
 if (APPLE)
   target_link_libraries (${PROJECT_NAME} PRIVATE "-framework CoreFoundation" "-framework Appkit" objc)
 endif()
+
+add_executable(StStereoUnpackTest testStereoUnpack.cpp)
+target_link_libraries(StStereoUnpackTest PRIVATE StShared avutil)
+add_test(NAME stereo-unpack COMMAND StStereoUnpackTest)

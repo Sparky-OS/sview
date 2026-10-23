@@ -425,6 +425,7 @@ add_subdirectory(StMoviePlayer)
 
 if (NOT ANDROID)
   add_subdirectory(StMonitorsDump)
+  enable_testing()
   add_subdirectory(StTests)
 endif()
 add_subdirectory(sview)

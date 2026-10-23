@@ -28,12 +28,26 @@ StString st::formatToString(StFormat theFormatEnum) {
         case StFormat_TopBottom_RL:  return StFormat_TopBottom_RL_STRING;
         case StFormat_Rows:          return StFormat_Rows_STRING;
         case StFormat_FrameSequence: return StFormat_FrameSequence_STRING;
+        case StFormat_Columns: return "interlaceColumn";
+        case StFormat_Columns_RL: return "interlaceColumnRL";
+        case StFormat_Rows_RL: return "interlaceRowRL";
+        case StFormat_Checkerboard: return "checkerboard";
+        case StFormat_Checkerboard_RL: return "checkerboardRL";
+        case StFormat_Quincunx: return "quincunx";
+        case StFormat_Quincunx_RL: return "quincunxRL";
         case StFormat_AUTO:
         default:                     return StFormat_AUTO_STRING;
     }
 }
 
 StFormat st::formatFromString(const StString& theFormatString) {
+    if(theFormatString.isEqualsIgnoreCase(stCString("interlaceColumn"))) { return StFormat_Columns; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("interlaceColumnRL"))) { return StFormat_Columns_RL; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("interlaceRowRL"))) { return StFormat_Rows_RL; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("checkerboard"))) { return StFormat_Checkerboard; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("checkerboardRL"))) { return StFormat_Checkerboard_RL; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("quincunx"))) { return StFormat_Quincunx; }
+    if(theFormatString.isEqualsIgnoreCase(stCString("quincunxRL"))) { return StFormat_Quincunx_RL; }
     if(theFormatString.isEqualsIgnoreCase(StFormat_Mono_STRING)) {
         return StFormat_Mono;
     } else if(theFormatString.isEqualsIgnoreCase(StFormat_SideBySide_RL_STRING)) {
@@ -59,7 +73,14 @@ StFormat st::formatReversed(const StFormat theFormatEnum) {
         case StFormat_SideBySide_LR: return StFormat_SideBySide_RL;
         case StFormat_TopBottom_RL:  return StFormat_TopBottom_LR;
         case StFormat_TopBottom_LR:  return StFormat_TopBottom_RL;
-        case StFormat_Rows:
+        case StFormat_Columns: return StFormat_Columns_RL;
+        case StFormat_Columns_RL: return StFormat_Columns;
+        case StFormat_Rows: return StFormat_Rows_RL;
+        case StFormat_Rows_RL: return StFormat_Rows;
+        case StFormat_Checkerboard: return StFormat_Checkerboard_RL;
+        case StFormat_Checkerboard_RL: return StFormat_Checkerboard;
+        case StFormat_Quincunx: return StFormat_Quincunx_RL;
+        case StFormat_Quincunx_RL: return StFormat_Quincunx;
         case StFormat_FrameSequence:
         case StFormat_Mono:
         case StFormat_AUTO:

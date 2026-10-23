@@ -448,8 +448,8 @@ namespace stAV {
             case AV_STEREO3D_SIDEBYSIDE:    return StFormat_SideBySide_LR;
             case AV_STEREO3D_TOPBOTTOM:     return StFormat_TopBottom_LR;
             case AV_STEREO3D_FRAMESEQUENCE: return StFormat_FrameSequence;
-            //case AV_STEREO3D_CHECKERBOARD:        return StFormat_Checkboard;
-            //case AV_STEREO3D_SIDEBYSIDE_QUINCUNX: return StFormat_Checkboard;
+            case AV_STEREO3D_CHECKERBOARD: return StFormat_Checkerboard;
+            case AV_STEREO3D_SIDEBYSIDE_QUINCUNX: return StFormat_Quincunx;
             case AV_STEREO3D_LINES:         return StFormat_Rows;
             case AV_STEREO3D_COLUMNS:       return StFormat_Columns;
             default:                        return StFormat_AUTO;
@@ -478,10 +478,22 @@ namespace stAV {
                 return AV_STEREO3D_TOPBOTTOM;
             case StFormat_TopBottom_LR:
                 return AV_STEREO3D_TOPBOTTOM;
+            case StFormat_Rows_RL:
+                theIsReversed = true;
             case StFormat_Rows:
                 return AV_STEREO3D_LINES;
+            case StFormat_Columns_RL:
+                theIsReversed = true;
             case StFormat_Columns:
                 return AV_STEREO3D_COLUMNS;
+            case StFormat_Checkerboard_RL:
+                theIsReversed = true;
+            case StFormat_Checkerboard:
+                return AV_STEREO3D_CHECKERBOARD;
+            case StFormat_Quincunx_RL:
+                theIsReversed = true;
+            case StFormat_Quincunx:
+                return AV_STEREO3D_SIDEBYSIDE_QUINCUNX;
             //case StFormat_SeparateFrames:
             case StFormat_FrameSequence:
                 return AV_STEREO3D_FRAMESEQUENCE;

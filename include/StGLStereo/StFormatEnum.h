@@ -27,6 +27,12 @@ enum StFormat {
     StFormat_AnaglyphGreenMagenta,
     StFormat_AnaglyphYellowBlue,
     StFormat_Tiled4x,               //!< Sisvel 3D frame format to fit 720p stereopair into 1080p frame
+    StFormat_Columns_RL,
+    StFormat_Rows_RL,
+    StFormat_Checkerboard,
+    StFormat_Checkerboard_RL,
+    StFormat_Quincunx,
+    StFormat_Quincunx_RL,
     StFormat_NB
 };
 
@@ -120,10 +126,16 @@ namespace st {
             case StFormat_SideBySide_LR:
             case StFormat_SideBySide_RL:
             case StFormat_Columns:
+            case StFormat_Columns_RL:
+            case StFormat_Checkerboard:
+            case StFormat_Checkerboard_RL:
+            case StFormat_Quincunx:
+            case StFormat_Quincunx_RL:
                 return StPairRatio_HalfWidth;
             case StFormat_TopBottom_LR:
             case StFormat_TopBottom_RL:
             case StFormat_Rows:
+            case StFormat_Rows_RL:
                 return StPairRatio_HalfHeight;
             default:
                 return StPairRatio_1;
