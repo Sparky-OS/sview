@@ -9,4 +9,4 @@ override_dh_auto_configure:
 	dh_auto_configure -- -DUSE_STEREO_KWIN=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 override_dh_auto_test:
-	dh_auto_test -- ARGS=--output-on-failure
+	CTEST_OUTPUT_ON_FAILURE=1 dh_auto_test
