@@ -835,7 +835,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StGLMatrix aModelMat;
     // data rectangle in the texture
     StGLVec4 aClampVec(0.0f, 0.0f, 1.0f, 1.0f), aClampUV(0.0f, 0.0f, 1.0f, 1.0f), aClampA(0.0f, 0.0f, 1.0f, 1.0f);
-    if(params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST) {
+    if(params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST
+    || (myRoot->isFlatStereo() && aParams->ViewingMode == StViewSurface_Plain)) {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_NEAREST);
         //
         aClampVec.x() = 0.0f;
