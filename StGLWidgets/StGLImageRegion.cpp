@@ -735,7 +735,7 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
     if (!myIsInitialized || !isVisible() || aParams.get() == nullptr
      || !myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid()
      || !myHasVideoStream) {
-        StGLWidget::stglDraw(theView);
+        StGLWidget::stglDraw(aUiView);
         return;
     }
 
