@@ -351,6 +351,9 @@ class StWindowImpl {
 
     bool               myToResetDevice;   //!< indicate device lost state
     ST_LOCAL bool prepareCompositorFrame();
+    ST_LOCAL void commitCompositorFrame();
+    unsigned           myCompositorSerial = 0;
+    int                myCompositorDisplayHeight = 0;
     int                myCompositorWidth = 0;
     int                myCompositorHeight = 0;
     double             myCompositorPixelRatio = 1.0;

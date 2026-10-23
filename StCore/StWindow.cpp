@@ -308,6 +308,9 @@ void StWindow::stglDraw() {
         signals.onRedraw(ST_DRAW_LEFT);
     }
     stglSwap(ST_WIN_ALL);
+#ifdef ST_HAVE_STEREO_KWIN
+    myWin->commitCompositorFrame();
+#endif
 }
 
 StGLBoxPx StWindow::stglViewport(const int theWinEnum) const {

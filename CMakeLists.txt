@@ -417,7 +417,7 @@ if (USE_STEREO_KWIN)
     message(FATAL_ERROR "Stereo KWin output requires X11/XWayland")
   endif()
   find_package(PkgConfig REQUIRED)
-  pkg_check_modules(STEREO_DECLARE REQUIRED IMPORTED_TARGET stereo-declare>=1.4.0)
+  pkg_check_modules(STEREO_DECLARE REQUIRED IMPORTED_TARGET stereo-declare>=1.6.0)
   add_compile_definitions(ST_HAVE_STEREO_KWIN)
 endif()
 

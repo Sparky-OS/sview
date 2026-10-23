@@ -67,7 +67,7 @@ namespace {
         aWinAttribsX.event_mask =  KeyPressMask   | KeyReleaseMask    // receive keyboard events
                                 | ButtonPressMask | ButtonReleaseMask // receive mouse events
                                 | StructureNotifyMask                 // receive ConfigureNotify event on resize and move
-                                | FocusChangeMask;
+                                | FocusChangeMask | PropertyChangeMask;
                               //| ResizeRedirectMask                  // receive ResizeRequest event on resize (instead of common ConfigureNotify)
                               //| ExposureMask
                               //| EnterWindowMask|LeaveWindowMask
@@ -806,9 +806,8 @@ void StWindowImpl::parseXDNDSelectionMsg() {
 bool StWindowImpl::prepareCompositorFrame() {
     Display* aDisplay = myMaster.stXDisplay->hDisplay;
     int aWidth = myCompositorWidth, aHeight = myCompositorHeight;
-    if(attribs.IsFullScreen && aWidth > 0) {
-        const StRectI_t& aScreen = myMonitors[myRectNorm.center()].getVRect();
-        const double anAspect = double(aScreen.width()) / aScreen.height() / myCompositorPixelRatio;
+    if(myCompositorDisplayHeight > 0 && aWidth > 0) {
+        const double anAspect = double(myCompositorDisplayWidth) / myCompositorDisplayHeight / myCompositorPixelRatio;
         aWidth = stMax(aWidth, int(std::ceil(myCompositorHeight * anAspect)));
         aHeight = stMax(aHeight, int(std::ceil(myCompositorWidth / anAspect)));
     }
@@ -818,7 +817,7 @@ bool StWindowImpl::prepareCompositorFrame() {
         myRectFull = myRectNorm;
         const int aDisplayHeight = stMax(1, int(myCompositorDisplayWidth * double(myCompositorHeight)
                                               / (myCompositorWidth * myCompositorPixelRatio)));
-        if(!attribs.IsFullScreen) {
+        if(!myCompositorSerial && !myCompositorDisplayHeight) {
             stereo_declare_x11_one_view_size(aDisplay, myMaster.hWindow, myCompositorDisplayWidth, aDisplayHeight);
         }
         XSizeHints aHints = {};
@@ -835,6 +834,17 @@ bool StWindowImpl::prepareCompositorFrame() {
     XGetWindowAttributes(aDisplay, myMaster.hWindow, &aParent);
     return aParent.width == 2 * myRectNorm.width() && aParent.height == myRectNorm.height();
 }
+
+void StWindowImpl::commitCompositorFrame() {
+    if(myHasStereoDeclaration && myCompositorSerial != 0) {
+        stereo_x11_one_view_request aRequest = {myCompositorSerial,
+            unsigned(myCompositorDisplayWidth), unsigned(myCompositorDisplayHeight)};
+        stereo_declare_x11_one_view_commit(myMaster.stXDisplay->hDisplay, myMaster.hWindow,
+                                           &aRequest, aRequest.width, aRequest.height);
+        myCompositorSerial = 0;
+    }
+}
+
 #endif
 
 void StWindowImpl::updateWindowPos() {
@@ -1093,6 +1103,19 @@ void StWindowImpl::processEvents() {
                 }
                 break;
             }
+#ifdef ST_HAVE_STEREO_KWIN
+            case PropertyNotify: {
+                if(myHasStereoDeclaration) {
+                    stereo_x11_one_view_request aRequest = {};
+                    if(stereo_x11_one_view_event(aDisplay->hDisplay, myMaster.hWindow, &myXEvent, &aRequest) == 1) {
+                        myCompositorSerial = aRequest.serial;
+                        myCompositorDisplayWidth = int(aRequest.width);
+                        myCompositorDisplayHeight = int(aRequest.height);
+                    }
+                }
+                break;
+            }
+#endif
             //case ResizeRequest:
             //case ConfigureRequest:
             case ConfigureNotify: {
