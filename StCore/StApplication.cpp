@@ -115,11 +115,14 @@ void StApplication::stApplicationInit(const std::shared_ptr<StOpenInfo>& theOpen
     params.VSyncMode->changeValues().push_back("On");
     params.VSyncMode->changeValues().push_back("Mixed");
 
+    // the Stereo KWin build has one output: an output saved by another build is not read
+#ifndef ST_HAVE_STEREO_KWIN
     bool isOutModeAuto = true; // AUTO by default
     aGlobalSettings.loadBool(ST_SETTING_RENDERER_AUTO, isOutModeAuto);
     if(!isOutModeAuto) {
         aGlobalSettings.loadString(ST_SETTING_RENDERER, myRendId);
     }
+#endif
 
     // add additional paths
 #ifdef _WIN32
@@ -142,9 +145,13 @@ void StApplication::stApplicationInit(const std::shared_ptr<StOpenInfo>& theOpen
     StArgument anArgRenderer = anArgs[ARGUMENT_PLUGIN_OUT];
     StArgument anArgDevice   = anArgs[ARGUMENT_PLUGIN_OUT_DEVICE];
     StArgument anArgGlDebug  = anArgs[ARGUMENT_GLDEBUG];
+#ifndef ST_HAVE_STEREO_KWIN
     if(anArgRenderer.isValid()) {
         myRendId = anArgRenderer.getValue();
     }
+#else
+    (void )anArgRenderer;
+#endif
     //if(anArgDevice.isValid()) {
     //    aDevice = anArgDevice.getValue();
     //}

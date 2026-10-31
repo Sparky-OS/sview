@@ -33,7 +33,9 @@ static StString getAbout() {
           "  --paused             Open file in paused state\n"
           "  --seek=SECONDS       Seek to specified position\n"
           "  --in=image,video     Application to open (predefined values: image, video, diag)\n"
+#ifndef ST_HAVE_STEREO_KWIN
           "  --out=RENDERER       Stereoscopic output module (auto, StOutAnaglyph, StOutDual,...)\n"
+#endif
           "  --imageLib=IMGLIB    Setup 3rd-party library for image processing (FFmpeg, FreeImage, DevIL)\n"
           "  --viewMode=MODE      View mode (flat, sphere)\n"
           "  --srcFormat=FORMAT   Setup source format:\n"
