@@ -1,3 +1,25 @@
+sview (26.9+stereo3d2) UNRELEASED; urgency=medium
+
+  * ORDER 312: the edition build has one output, Stereo KWin's. 26.9+stereo3d1
+    built and installed sView's six display outputs (anaglyph, interlace, page
+    flip, two windows, iZ3D, distorted headset) beside it, and the person could
+    pick them, so the player drove displays itself. They are no longer built,
+    installed or offered, OpenVR is not used, and a configuration naming
+    another output opens on Stereo KWin's.
+  * The 3D menu holds Enable 3D, Render resolution per eye and Display
+    Configuration (KScreen's module); no display mode, eye separation or
+    program-wide JPS eye order. The per-file "Swap left and right eyes" sits
+    in the source format menu and is offered only for content shown in 3D.
+  * Checkerboard views are compacted from their own samples, no longer
+    interpolated; side-by-side quincunx is shown as side by side.
+  * JPS: rows are written and read with the "left field first" flag, layouts
+    the descriptor cannot describe are not saved as monoscopic, and the
+    per-file choices saved into a file are cleared.
+  * Right-first frame sequences (content_interpretation_type 2, Matroska
+    StereoMode 14) are paired in their own eye order.
+
+ -- Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>  Sat, 31 Oct 2026 18:00:00 +0000
+
 sview (26.9+stereo3d1) UNRELEASED; urgency=medium
 
   * Add an optional full side-by-side XWayland renderer using
