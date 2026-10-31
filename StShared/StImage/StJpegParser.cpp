@@ -648,7 +648,7 @@ bool StJpegParser::setupJps(const StFormat theFormat) {
             aStereoDesc |= SD_LAYOUT_OVERUNDER;
             break;
         case StFormat_Rows:
-            aStereoDesc |= SD_LAYOUT_INTERLEAVED;
+            aStereoDesc |= SD_LAYOUT_INTERLEAVED | SD_LEFT_FIELD_FIRST;
             break;
         case StFormat_AnaglyphRedCyan:
             aStereoDesc |= SD_LAYOUT_ANAGLYPH;
