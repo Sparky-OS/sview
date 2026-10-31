@@ -482,7 +482,10 @@ install (DIRECTORY "${CMAKE_SOURCE_DIR}/textures"                   DESTINATION 
 install (DIRECTORY "${CMAKE_SOURCE_DIR}/distribution/info"          DESTINATION "${SVIEW_INSTALL_RES}")
 install (FILES     "${CMAKE_SOURCE_DIR}/docs/license-gpl-3.0.txt"   DESTINATION "${SVIEW_INSTALL_RES}/info/" RENAME "license.txt")
 install (DIRECTORY "${CMAKE_BINARY_DIR}/Release/lang"               DESTINATION "${SVIEW_INSTALL_RES}")
-install (DIRECTORY "${CMAKE_BINARY_DIR}/Release/shaders"            DESTINATION "${SVIEW_INSTALL_RES}")
+if (NOT USE_STEREO_KWIN)
+  # the shaders belong to the output modules
+  install (DIRECTORY "${CMAKE_BINARY_DIR}/Release/shaders"          DESTINATION "${SVIEW_INSTALL_RES}")
+endif()
 install (DIRECTORY "${CMAKE_BINARY_DIR}/Release/web"                DESTINATION "${SVIEW_INSTALL_RES}")
 if (WIN32)
   # association icons
