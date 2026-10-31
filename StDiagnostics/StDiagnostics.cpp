@@ -24,12 +24,16 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
+#ifdef ST_HAVE_STEREO_KWIN
+#include "../StOutStereoKWin/StOutStereoKWin.h"
+#else
 #include "../StOutAnaglyph/StOutAnaglyph.h"
 #include "../StOutDual/StOutDual.h"
 #include "../StOutIZ3D/StOutIZ3D.h"
 #include "../StOutInterlace/StOutInterlace.h"
 #include "../StOutPageFlip/StOutPageFlipExt.h"
 #include "../StOutDistorted/StOutDistorted.h"
+#endif
 
 const StString StDiagnostics::ST_DRAWER_PLUGIN_NAME("StDiagnostics");
 
@@ -47,6 +51,8 @@ StDiagnostics::StDiagnostics(const std::shared_ptr<StResourceManager>& theResMgr
     addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
+#elif defined(ST_HAVE_STEREO_KWIN)
+    addRenderer(std::make_shared<StOutStereoKWin>(myResMgr, theParentWin));
 #else
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDual>       (myResMgr, theParentWin));

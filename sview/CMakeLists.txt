@@ -82,7 +82,10 @@ if (WIN32)
 endif()
 
 # internal dependencies
-set (aDeps StOutPageFlip StMoviePlayer StImageViewer StDiagnostics StCore StShared)
+set (aDeps StMoviePlayer StImageViewer StDiagnostics StCore StShared)
+if (NOT USE_STEREO_KWIN)
+  list(APPEND aDeps StOutPageFlip)
+endif()
 foreach (aDepIter ${aDeps})
   add_dependencies (${PROJECT_NAME} ${aDepIter})
   target_link_libraries (${PROJECT_NAME} PRIVATE ${aDepIter})

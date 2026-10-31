@@ -38,7 +38,7 @@ if (MSVC)
 endif()
 
 # internal dependencies
-set (aDeps StGLWidgets StOutAnaglyph StOutDual StOutIZ3D StOutInterlace StOutPageFlip StOutDistorted StCore StShared)
+set (aDeps StGLWidgets ${SVIEW_OUTPUTS} StCore StShared)
 foreach (aDepIter ${aDeps})
   add_dependencies (${PROJECT_NAME} ${aDepIter})
   target_link_libraries (${PROJECT_NAME} PRIVATE ${aDepIter})

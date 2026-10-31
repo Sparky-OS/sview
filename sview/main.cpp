@@ -11,7 +11,9 @@
 #include <StVersion.h>
 #include <StFile/StFolder.h>
 
+#ifndef ST_HAVE_STEREO_KWIN
 #include "../StOutPageFlip/StOutPageFlip.h"
+#endif
 
 int sView_main() {
 #ifdef _MSC_VER
@@ -24,7 +26,9 @@ int sView_main() {
 
     StProcess::setupProcessSignals();
 
+#ifndef ST_HAVE_STEREO_KWIN
     StOutPageFlip::initGlobalsAsync();
+#endif
     if(!StVersionInfo::checkTimeBomb("sView")) {
         return 1;
     }

@@ -45,12 +45,14 @@
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLTextureButton.h>
 
+#ifndef ST_HAVE_STEREO_KWIN
 #include "../StOutAnaglyph/StOutAnaglyph.h"
 #include "../StOutDual/StOutDual.h"
 #include "../StOutIZ3D/StOutIZ3D.h"
 #include "../StOutInterlace/StOutInterlace.h"
 #include "../StOutPageFlip/StOutPageFlipExt.h"
 #include "../StOutDistorted/StOutDistorted.h"
+#endif
 
 #include <cstdlib> // std::abs(int)
 
@@ -486,10 +488,9 @@ StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr
     addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
-#else
-#ifdef ST_HAVE_STEREO_KWIN
+#elif defined(ST_HAVE_STEREO_KWIN)
     addRenderer(std::make_shared<StOutStereoKWin>(myResMgr, theParentWin));
-#endif
+#else
     addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutDual>       (myResMgr, theParentWin));
     addRenderer(std::make_shared<StOutIZ3D>       (myResMgr, theParentWin));

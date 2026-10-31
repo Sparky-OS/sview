@@ -145,6 +145,12 @@ endif()
 if (APPLE)
   set (USE_OPENVR    OFF)
 endif()
+# Stereo KWin converts the declared side-by-side pair for every display,
+# so this build carries no output module of its own and no headset path.
+option(USE_STEREO_KWIN "Hand Stereo KWin the declared full side-by-side pair as the only output" OFF)
+if (USE_STEREO_KWIN)
+  set (USE_OPENVR    OFF)
+endif()
 
 if (USE_MONGOOSE)
   add_definitions(-DST_HAVE_MONGOOSE)
@@ -411,7 +417,6 @@ function (sview_set_target_output_dirs theTarget)
 endfunction()
 
 # core libraries
-option(USE_STEREO_KWIN "Default to declared full side-by-side on Stereo KWin" OFF)
 if (USE_STEREO_KWIN)
   if (NOT USE_XLIB)
     message(FATAL_ERROR "Stereo KWin output requires X11/XWayland")
@@ -428,13 +433,16 @@ add_subdirectory(StGLWidgets)
 # outputs
 if (USE_STEREO_KWIN)
   add_subdirectory(StOutStereoKWin)
+  set (SVIEW_OUTPUTS StOutStereoKWin)
+else()
+  add_subdirectory(StOutAnaglyph)
+  add_subdirectory(StOutDistorted)
+  add_subdirectory(StOutDual)
+  add_subdirectory(StOutInterlace)
+  add_subdirectory(StOutIZ3D)
+  add_subdirectory(StOutPageFlip)
+  set (SVIEW_OUTPUTS StOutAnaglyph StOutDual StOutIZ3D StOutInterlace StOutPageFlip StOutDistorted)
 endif()
-add_subdirectory(StOutAnaglyph)
-add_subdirectory(StOutDistorted)
-add_subdirectory(StOutDual)
-add_subdirectory(StOutInterlace)
-add_subdirectory(StOutIZ3D)
-add_subdirectory(StOutPageFlip)
 
 # applications
 add_subdirectory(StDiagnostics)
