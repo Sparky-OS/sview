@@ -187,7 +187,13 @@ void StImageViewerGUI::createUpperToolbar() {
         iconTexture(stCString("menuRedCyanLR"),      anIconSize),
         iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
         iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
-        iconTexture(stCString("menuTiledLR"),        anIconSize)
+        iconTexture(stCString("menuTiledLR"),        anIconSize),
+        iconTexture(stCString("menuColLR"),          anIconSize), // columns, right first
+        iconTexture(stCString("menuRowRL"),          anIconSize),
+        iconTexture(stCString("menuRowLR"),          anIconSize), // checkerboard
+        iconTexture(stCString("menuRowRL"),          anIconSize), // checkerboard, right first
+        iconTexture(stCString("menuSbsLR"),          anIconSize), // side by side quincunx
+        iconTexture(stCString("menuSbsRL"),          anIconSize), // side by side quincunx, right first
     };
     aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
     aSrcBtn->setDrawShadow(true);
@@ -1063,7 +1069,13 @@ void StImageViewerGUI::createMobileUpperToolbar() {
         iconTexture(stCString("menuRedCyanLR"),      anIconSize),
         iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
         iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
-        iconTexture(stCString("menuTiledLR"),        anIconSize)
+        iconTexture(stCString("menuTiledLR"),        anIconSize),
+        iconTexture(stCString("menuColLR"),          anIconSize), // columns, right first
+        iconTexture(stCString("menuRowRL"),          anIconSize),
+        iconTexture(stCString("menuRowLR"),          anIconSize), // checkerboard
+        iconTexture(stCString("menuRowRL"),          anIconSize), // checkerboard, right first
+        iconTexture(stCString("menuSbsLR"),          anIconSize), // side by side quincunx
+        iconTexture(stCString("menuSbsRL"),          anIconSize), // side by side quincunx, right first
     };
     aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
     aSrcBtn->setDrawShadow(true);

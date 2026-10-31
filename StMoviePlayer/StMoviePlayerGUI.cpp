@@ -164,6 +164,12 @@ void StMoviePlayerGUI::createUpperToolbar() {
         iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
         iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
         iconTexture(stCString("menuTiledLR"),        anIconSize),
+        iconTexture(stCString("menuColLR"),          anIconSize), // columns, right first
+        iconTexture(stCString("menuRowRL"),          anIconSize),
+        iconTexture(stCString("menuRowLR"),          anIconSize), // checkerboard
+        iconTexture(stCString("menuRowRL"),          anIconSize), // checkerboard, right first
+        iconTexture(stCString("menuSbsLR"),          anIconSize), // side by side quincunx
+        iconTexture(stCString("menuSbsRL"),          anIconSize), // side by side quincunx, right first
         iconTexture(stCString("menuAuto"),           anIconSize)
     };
     aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB + 1);
@@ -1334,6 +1340,12 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
         iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
         iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
         iconTexture(stCString("menuTiledLR"),        anIconSize),
+        iconTexture(stCString("menuColLR"),          anIconSize), // columns, right first
+        iconTexture(stCString("menuRowRL"),          anIconSize),
+        iconTexture(stCString("menuRowLR"),          anIconSize), // checkerboard
+        iconTexture(stCString("menuRowRL"),          anIconSize), // checkerboard, right first
+        iconTexture(stCString("menuSbsLR"),          anIconSize), // side by side quincunx
+        iconTexture(stCString("menuSbsRL"),          anIconSize), // side by side quincunx, right first
         iconTexture(stCString("menuAuto"),           anIconSize)
     };
     aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB + 1);
