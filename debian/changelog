@@ -16,7 +16,8 @@ sview (26.9+stereo3d2) UNRELEASED; urgency=medium
     the descriptor cannot describe are not saved as monoscopic, and the
     per-file choices saved into a file are cleared.
   * Right-first frame sequences (content_interpretation_type 2, Matroska
-    StereoMode 14) are paired in their own eye order.
+    StereoMode 14) are paired in their own eye order, and the pairs restart
+    at the decoded key frame, not at the key frame packet just sent.
 
  -- Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>  Sat, 31 Oct 2026 18:00:00 +0000
 
