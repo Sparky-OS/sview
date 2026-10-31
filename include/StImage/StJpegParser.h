@@ -208,6 +208,11 @@ class StJpegParser : public StRawFile {
         public:
 
     /**
+     * Return true if the JPS stereoscopic descriptor can describe this format.
+     */
+    ST_CPPEXPORT static bool isJpsFormat(const StFormat theFormat);
+
+    /**
      * Create/modify JPS section.
      */
     ST_CPPEXPORT bool setupJps(const StFormat theFormat);

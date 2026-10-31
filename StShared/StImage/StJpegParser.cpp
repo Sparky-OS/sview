@@ -483,7 +483,9 @@ std::shared_ptr<StJpegParser::Image> StJpegParser::parseImage(const int      the
                     if(aStereoDesc & 0x00000001) {
                         const bool isLeftFirst = (aStereoDesc & SD_LEFT_FIELD_FIRST) != 0;
                         switch(aStereoDesc & 0x0000FF00) {
-                            case SD_LAYOUT_INTERLEAVED: myStFormat = StFormat_Rows;            break;
+                            case SD_LAYOUT_INTERLEAVED: myStFormat = isLeftFirst
+                                                                   ? StFormat_Rows
+                                                                   : StFormat_Rows_RL;         break;
                             case SD_LAYOUT_SIDEBYSIDE:  myStFormat = isLeftFirst
                                                                    ? StFormat_SideBySide_LR
                                                                    : StFormat_SideBySide_RL;   break;
@@ -602,8 +604,25 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
     return true;
 }
 
+bool StJpegParser::isJpsFormat(const StFormat theFormat) {
+    switch(theFormat) {
+        case StFormat_Mono:
+        case StFormat_SideBySide_LR:
+        case StFormat_SideBySide_RL:
+        case StFormat_TopBottom_LR:
+        case StFormat_TopBottom_RL:
+        case StFormat_Rows:
+        case StFormat_Rows_RL:
+        case StFormat_AnaglyphRedCyan:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool StJpegParser::setupJps(const StFormat theFormat) {
-    if(myBuffer == NULL) {
+    if(myBuffer == NULL
+    || !isJpsFormat(theFormat)) {
         return false;
     }
 
@@ -648,6 +667,9 @@ bool StJpegParser::setupJps(const StFormat theFormat) {
             aStereoDesc |= SD_LAYOUT_OVERUNDER;
             break;
         case StFormat_Rows:
+            aStereoDesc |= SD_LAYOUT_INTERLEAVED | SD_LEFT_FIELD_FIRST;
+            break;
+        case StFormat_Rows_RL:
             aStereoDesc |= SD_LAYOUT_INTERLEAVED;
             break;
         case StFormat_AnaglyphRedCyan:

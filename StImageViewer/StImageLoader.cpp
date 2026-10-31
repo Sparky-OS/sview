@@ -776,6 +776,11 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
     if(theInfo->Id->ToSwapLR) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
+    if(!StJpegParser::isJpsFormat(aSrcFormat)) {
+        // the descriptor would declare the picture monoscopic
+        myMsgQueue->pushError(stCString("Operation is unavailable for this stereoscopic format"));
+        return false;
+    }
 
     StJpegParser aParser;
     if(!aParser.readFile(theInfo->Path)) {
@@ -824,6 +829,10 @@ void StImageLoader::mainLoop() {
                 if(!saveImageInfo(anInfo)) {
                     break;
                 }
+                // the file now carries the layout and the eye order, so the per-file choices
+                // that were saved into it are cleared before the file is read again
+                anInfo->Id->InputFormat = StFormat_AUTO;
+                anInfo->Id->setSwapLR(false);
                 // re-load image file
             }
             ST_FALLTHROUGH
