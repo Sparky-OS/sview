@@ -191,6 +191,7 @@ StVideoQueue::StVideoQueue(const std::shared_ptr<StGLTextureQueue>& theTextureQu
   myAudioClock(0.0),
   myAudioDelayMSec(0),
   myFramesCounter(1),
+  myIsFrameSeqRightFirst(false),
   myWasFlushed(false),
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
@@ -229,6 +230,7 @@ namespace {
 
     static constexpr StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
     static constexpr StCString THE_SRC_MODE_KEY_WMV = stCString("StereoscopicLayout");
+    static constexpr StCString THE_FRAMESEQ_RL      = stCString("block_rl");
 
     static constexpr StFFmpegStereoFormat STEREOFLAGS[] = {
         // MKV stereoscopic mode decoded by FFmpeg into STEREO_MODE metadata tag
@@ -486,6 +488,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // stereoscopic mode tags
     myStFormatInStream = check720in1080() ? StFormat_Tiled4x : StFormat_AUTO;
+    myIsFrameSeqRightFirst = false;
     if(stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myStream,    THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY_WMV, aValue)) {
@@ -495,6 +498,8 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                 break;
             } else if(aValue == aFlag.name) {
                 myStFormatInStream = aFlag.stID;
+                // Matroska StereoMode 14: both eyes laced in one Block, right eye first
+                myIsFrameSeqRightFirst = aValue == THE_FRAMESEQ_RL;
                 //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
                 break;
             }
@@ -964,6 +969,10 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
             myStFormatInStream = st::formatReversed(myStFormatInStream);
         }
+        // a frame sequence has no reversed format: an inverted one starts with the right view
+        // (H.264 D.2.26 content_interpretation_type 2, Matroska StereoMode 14)
+        myIsFrameSeqRightFirst = myStFormatInStream == StFormat_FrameSequence
+                              && (aStereo->flags & AV_STEREO3D_FLAG_INVERT) != 0;
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 19, 100))
         if(myStFormatInStream == StFormat_FrameSequence) {
             // technically, view_ids_available/view_pos_available codec context options should be checked
@@ -1003,6 +1012,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
                 break;
             } else if(theTagValue == aFlag.name) {
                 myStFormatInStream = aFlag.stID;
+                myIsFrameSeqRightFirst = theTagValue == THE_FRAMESEQ_RL;
                 //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
                 break;
             }
@@ -1090,11 +1100,14 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
             theIsStarted = false;
         }
 
-        // simple one-stream case
+        // simple one-stream case; the stream's own eye order applies unless the user chose the format
+        const bool isRightFirst = myIsFrameSeqRightFirst && myStFormatByUser == StFormat_AUTO;
         if(aSrcFormat == StFormat_FrameSequence) {
-            const bool isRightView = !isOddNumber(myFramesCounter);
-            if(!isRightView) {
+            const bool isSecondFrame = !isOddNumber(myFramesCounter);
+            if(!isSecondFrame) {
                 myCachedFrame.fill(myDataAdp, false);
+            } else if(isRightFirst) {
+                pushFrame(myDataAdp, myCachedFrame, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
             } else {
                 pushFrame(myCachedFrame, myDataAdp, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
             }
@@ -1102,8 +1115,9 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         } else if(myStFormatInStream == StFormat_FrameSequence) {
             // this is counter-efficient - it is better requesting single view
             // within "view_ids" decoder context when displaying MONO
-            const bool isRightView = !isOddNumber(myFramesCounter);
-            if(!isRightView) {
+            const bool isSecondFrame = !isOddNumber(myFramesCounter);
+            if(isSecondFrame == isRightFirst) {
+                // the left view
                 pushFrame(myDataAdp, myEmptyImage, thePacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
             }
             ++myFramesCounter;
