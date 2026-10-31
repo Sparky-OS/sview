@@ -106,6 +106,12 @@ void loadDefaults(StLangMap& theStrings) {
                "Fullscreen");
     theStrings(MENU_VIEW_RESET,
                "Reset");
+    theStrings(MENU_3D, "3D");
+    theStrings(MENU_3D_ENABLE, "Enable 3D");
+    theStrings(MENU_3D_RENDER_RESOLUTION, "Render resolution per eye");
+    theStrings(MENU_3D_RESOLUTION_OWN, "The picture's own resolution");
+    theStrings(MENU_3D_DISPLAY_SETTINGS, "Display Configuration...");
+    theStrings(MENU_3D_SWAP_EYES, "Swap left and right eyes");
     theStrings(MENU_VIEW_SWAP_LR,
                "Swap Left/Right");
     theStrings(MENU_VIEW_DISPLAY_RATIO,

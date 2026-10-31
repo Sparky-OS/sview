@@ -80,6 +80,16 @@ class StGLImageRegion : public StGLWidget {
 
         public: //!< public interface
 
+#ifdef ST_HAVE_STEREO_KWIN
+    /**
+     * The Stereo KWin build offers no eye separation and no display mode cycling.
+     */
+    ST_LOCAL static bool isStereoKWinAction(const int theActionId) {
+        return (theActionId < Action_SepXDec || theActionId > Action_SepRotInc)
+            &&  theActionId != Action_ModeNext;
+    }
+#endif
+
     /**
      * Default constructor.
      */

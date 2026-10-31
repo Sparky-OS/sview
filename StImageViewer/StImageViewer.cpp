@@ -137,6 +137,11 @@ void StImageViewer::updateStrings() {
     params.ToOpenLast->setName(tr(OPTION_OPEN_LAST_ON_STARTUP));
     params.ToSaveRecent->setName(stCString("Remember recent file"));
     params.TargetFps->setName(stCString("FPS Target"));
+#ifdef ST_HAVE_STEREO_KWIN
+    params.ToEnable3D->setName(tr(MENU_3D_ENABLE));
+    params.RenderResolution->setName(tr(MENU_3D_RENDER_RESOLUTION));
+    params.RenderResolution->defineOption(0, tr(MENU_3D_RESOLUTION_OWN));
+#endif
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 }
 
@@ -229,6 +234,13 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
 #endif
     params.imageLib = StImageFile::ST_LIBAV,
     params.TargetFps = new StInt32ParamNamed(0, stCString("fpsTarget"));
+#ifdef ST_HAVE_STEREO_KWIN
+    params.ToEnable3D = new StBoolParamNamed(true, stCString("toEnable3d"));
+    params.RenderResolution = new StEnumParam(0, stCString("renderResolution"));
+    for(int32_t aResIter = 0; aResIter < StStereoKWinResolution::NB; ++aResIter) {
+        params.RenderResolution->defineOption(aResIter, StStereoKWinResolution::name(aResIter));
+    }
+#endif
     updateStrings();
 
     mySettings->loadParam(params.ExitOnEscape);
@@ -240,7 +252,12 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadParam (params.LastUpdateDay);
     mySettings->loadParam (params.CheckUpdatesDays);
+#ifdef ST_HAVE_STEREO_KWIN
+    mySettings->loadParam (params.ToEnable3D);
+    mySettings->loadParam (params.RenderResolution);
+#else
     mySettings->loadParam (params.ToSwapJPS);
+#endif
     mySettings->loadParam (params.ToSaveCrossEyed);
     mySettings->loadParam (params.ToStickPanorama);
     mySettings->loadParam (params.LastPanoramaMode);
@@ -396,6 +413,7 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
         anAction->setSlot(stSlot(this, &StImageViewer::doTheaterOnOff));
         addAction(Action_TheaterOnOff, anAction, ST_VK_P | ST_VF_CONTROL, ST_VK_T);
     }
+#ifndef ST_HAVE_STEREO_KWIN
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), StGLImageRegion::MODE_STEREO);
         anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
@@ -421,6 +439,7 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
         anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
         addAction(Action_OutStereoCrossEyed, anAction);
     }
+#endif
 }
 
 bool StImageViewer::resetDevice() {
@@ -468,7 +487,12 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam(params.LastUpdateDay);
         mySettings->saveParam(params.CheckUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
+#ifdef ST_HAVE_STEREO_KWIN
+        mySettings->saveParam (params.ToEnable3D);
+        mySettings->saveParam (params.RenderResolution);
+#else
         mySettings->saveParam (params.ToSwapJPS);
+#endif
         mySettings->saveParam (params.ToSaveCrossEyed);
         mySettings->saveParam (params.ToStickPanorama);
         mySettings->saveParam (params.LastPanoramaMode);
@@ -561,7 +585,10 @@ bool StImageViewer::createGui() {
     // load settings
     doChangeMobileUI(params.IsMobileUI->getValue());
     myWindow->setTargetFps(double(params.TargetFps->getValue()));
+#ifndef ST_HAVE_STEREO_KWIN
+    // Stereo KWin draws the declared pair for every display: no display mode is restored
     mySettings->loadParam (myGUI->myImage->params.DisplayMode);
+#endif
     mySettings->loadParam (myGUI->myImage->params.TextureFilter);
     mySettings->loadParam (myGUI->myImage->params.DisplayRatio);
     mySettings->loadParam (myGUI->myImage->params.ToHealAnamorphicRatio);
@@ -579,6 +606,7 @@ bool StImageViewer::createGui() {
     mySettings->loadInt32(ST_SETTING_SATURATION, loadedSatur);
     myGUI->myImage->params.Saturation->setValue(0.01f * loadedSatur);
 
+#ifndef ST_HAVE_STEREO_KWIN
     int32_t loadedSepDX = 0;
     mySettings->loadInt32(ST_SETTING_SEP_DX, loadedSepDX);
     myGUI->myImage->params.SeparationDX->setValue(float(loadedSepDX));
@@ -590,6 +618,7 @@ bool StImageViewer::createGui() {
     int32_t loadedSepRot = 0;
     mySettings->loadInt32(ST_SETTING_SEP_ROT, loadedSepRot);
     myGUI->myImage->params.SeparationRot->setValue(0.01f * loadedSepRot);
+#endif
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->myImage->stglInit()) {
@@ -608,6 +637,11 @@ bool StImageViewer::createGui() {
     myGUI->stglResize(myWindow->stglUiViewport(), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 
     for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
+#ifdef ST_HAVE_STEREO_KWIN
+        if(!StGLImageRegion::isStereoKWinAction(int(anIter))) {
+            continue;
+        }
+#endif
         StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
         mySettings->loadHotKey(anAction);
         addAction(Action_StereoParamsBegin + int(anIter), anAction);
@@ -1287,16 +1321,32 @@ void StImageViewer::stglDraw(unsigned int theView) {
             hasStereoSource = !aParams->isMono()
                            && myGUI->myImage->hasVideoStream()
                            && myGUI->myImage->params.DisplayMode->getValue() == StGLImageRegion::MODE_STEREO;
+#ifdef ST_HAVE_STEREO_KWIN
+            hasStereoSource = hasStereoSource && params.ToEnable3D->getValue();
+#endif
         }
         myWindow->setStereoOutput(hasStereoSource);
     }
 
     // draw GUI
     myGUI->stglDraw(theView);
+#ifdef ST_HAVE_STEREO_KWIN
+    if(myWindow->isCompositorStereo()) {
+        const int32_t aResolution = params.RenderResolution->getValue();
+        if(myGUI->myImage->params.ViewMode->getValue() == StViewSurface_Plain) {
+            // a flat picture keeps its own samples in each eye, whatever the option says
+            const StVec2<int>& aSize = myGUI->myImage->getFrameSize();
+            myWindow->setCompositorViewSize(aSize.x(), aSize.y(), myGUI->myImage->getSampleRatio());
+        } else if(aResolution != StStereoKWinResolution::Own) {
+            myWindow->setCompositorViewSize(StStereoKWinResolution::width(aResolution), StStereoKWinResolution::height(aResolution), 1.0);
+        }
+    }
+#else
     if(myWindow->isCompositorStereo() && myGUI->myImage->params.ViewMode->getValue() == StViewSurface_Plain) {
         const StVec2<int>& aSize = myGUI->myImage->getFrameSize();
         myWindow->setCompositorViewSize(aSize.x(), aSize.y(), myGUI->myImage->getSampleRatio());
     }
+#endif
 }
 
 void StImageViewer::doScaleGui(const int32_t ) {
@@ -1366,6 +1416,17 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
         myLoader->doLoadNext();
     }
 }
+
+#ifdef ST_HAVE_STEREO_KWIN
+void StImageViewer::doOpenDisplaySettings(const size_t ) {
+    // KScreen's module owns every output format, the eye swap included
+    std::vector<StString> anArgs;
+    anArgs.push_back(stCString("kcm_kscreen"));
+    if(!StProcess::execProcessInPath(stCString("kcmshell6"), anArgs)) {
+        ST_ERROR_LOG("kcmshell6 can not be started");
+    }
+}
+#endif
 
 void StImageViewer::doSetStereoOutput(const size_t theMode) {
     if (myLoader.get() == nullptr) {

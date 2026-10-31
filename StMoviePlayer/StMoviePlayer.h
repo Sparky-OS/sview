@@ -255,6 +255,10 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    UseGpu;            //!< use video decoding on GPU when available
         StHandle<StBoolParamNamed>    UseOpenJpeg;       //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
         StHandle<StBoolParamNamed>    Benchmark;         //!< benchmark flag
+#ifdef ST_HAVE_STEREO_KWIN
+        StHandle<StBoolParamNamed>    ToEnable3D;        //!< show stereoscopic videos in 3D
+        StHandle<StEnumParam>         RenderResolution;  //!< per-eye canvas of the projected views
+#endif
 
     } params;
 
@@ -325,6 +329,9 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSetStereoOutput(const size_t theMode);
+#ifdef ST_HAVE_STEREO_KWIN
+    ST_LOCAL void doOpenDisplaySettings(const size_t dummy = 0);
+#endif
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doTheaterOnOff(const size_t );

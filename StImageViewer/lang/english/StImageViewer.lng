@@ -199,3 +199,10 @@
 1147=Checkerboard (R/L)
 1148=Quincunx (L/R)
 1149=Quincunx (R/L)
+
+1460=3D
+1461=Enable 3D
+1462=Render resolution per eye
+1463=The picture's own resolution
+1464=Display Configuration...
+1465=Swap left and right eyes

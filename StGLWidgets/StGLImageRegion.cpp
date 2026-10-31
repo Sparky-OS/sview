@@ -40,6 +40,12 @@ namespace {
             if (aParams.get() == nullptr || aParams->ToSwapLR == theValue) {
                 return false;
             }
+#ifdef ST_HAVE_STEREO_KWIN
+            // the eye swap is a correction of 3D content only
+            if (theValue && aParams->isMono()) {
+                return false;
+            }
+#endif
             aParams->setSwapLR(theValue);
             return true;
         }

@@ -160,6 +160,10 @@ class StImageViewer : public StApplication {
         StString                      lastFolder;       //!< laster folder used to open / save file
         StImageFile::ImageClass       imageLib;         //!< preferred image library
         StHandle<StInt32ParamNamed>   TargetFps;        //!< limit or not rendering FPS
+#ifdef ST_HAVE_STEREO_KWIN
+        StHandle<StBoolParamNamed>    ToEnable3D;       //!< show stereoscopic pictures in 3D
+        StHandle<StEnumParam>         RenderResolution; //!< per-eye canvas of the projected views
+#endif
 
     } params;
 
@@ -197,6 +201,9 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doSetStereoOutput(const size_t theMode);
+#ifdef ST_HAVE_STEREO_KWIN
+    ST_LOCAL void doOpenDisplaySettings(const size_t dummy = 0);
+#endif
     ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doTheaterOnOff(const size_t );
     ST_LOCAL void doChangeSwapJPS(const bool );

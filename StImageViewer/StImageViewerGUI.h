@@ -169,6 +169,11 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createImageAdjustMenu();  // Root -> View menu -> Image Adjust
     ST_LOCAL StGLMenu* create3dAdjustMenu();     // Root -> View menu -> Stereo 3D Adjust
     ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
+#ifdef ST_HAVE_STEREO_KWIN
+    ST_LOCAL StGLMenu* create3dMenu();           // Root -> 3D menu
+    ST_LOCAL bool      isShownIn3d() const;      // the current picture is shown in 3D
+    ST_LOCAL void      updateSrcFormatMenu();    // refill Root -> Media -> Source format
+#endif
     ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
     ST_LOCAL StGLMenu* createScaleMenu();        // Root -> Scale Interface menu
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
@@ -223,6 +228,8 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLPlayList*       myPlayList;
 
     StGLMenu*           myMenuRoot;         //!< main menu
+    StGLMenu*           myMenuSrcFormat;    //!< Root -> Media -> Source format menu
+    bool                myIsSrcMenu3d;      //!< the source format menu offers the eye swap
 
     StGLWidget*         myPanelUpper;       //!< upper  toolbar
     StGLWidget*         myPanelBottom;      //!< bottom toolbar

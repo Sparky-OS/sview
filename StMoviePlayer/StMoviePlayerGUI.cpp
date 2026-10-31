@@ -331,13 +331,21 @@ void StMoviePlayerGUI::createMainMenu() {
 
     StGLMenu* aMenuMedia   = createMediaMenu();     // Root -> Media menu
     StGLMenu* aMenuView    = createViewMenu();      // Root -> View menu
+#ifdef ST_HAVE_STEREO_KWIN
+    StGLMenu* aMenu3d      = create3dMenu();        // Root -> 3D menu
+#else
     StGLMenu* aDevicesMenu = createOutputMenu();    // Root -> Output menu
+#endif
     StGLMenu* aMenuHelp    = createHelpMenu();      // Root -> Help menu
 
     // Attach sub menus to root
     myMenuRoot->addItem(tr(MENU_MEDIA),     aMenuMedia);
     myMenuRoot->addItem(tr(MENU_VIEW),      aMenuView);
+#ifdef ST_HAVE_STEREO_KWIN
+    myMenuRoot->addItem(tr(MENU_3D),        aMenu3d);
+#else
     myMenuRoot->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
+#endif
     myMenuRoot->addItem(tr(MENU_HELP),      aMenuHelp);
 }
 
@@ -351,6 +359,7 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuWebUI     = createWebUIMenu();        // Root -> Media -> Web UI menu
 #endif
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu();    // Root -> Media -> Source format menu
+    myMenuSrcFormat = aMenuSrcFormat;
     myMenuOpenAL             = createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device
     StGLMenu* aMenuOpenImage = createOpenMovieMenu();    // Root -> Media -> Open movie menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
@@ -452,7 +461,58 @@ void StMoviePlayerGUI::fillSrcFormatMenu(StGLMenu* theMenu) {
            ->setIcon(stCMenuIcon("menuFrameSeqLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_TILED_4X),     myPlugin->params.SrcStereoFormat, StFormat_Tiled4x)
            ->setIcon(stCMenuIcon("menuTiledLR"));
+#ifdef ST_HAVE_STEREO_KWIN
+    myIsSrcMenu3d = isShownIn3d();
+    if(myIsSrcMenu3d) {
+        theMenu->addItem(tr(MENU_3D_SWAP_EYES), myImage->params.SwapLR);
+    }
+#endif
 }
+
+#ifdef ST_HAVE_STEREO_KWIN
+bool StMoviePlayerGUI::isShownIn3d() const {
+    const std::shared_ptr<StStereoParams>& aParams = myImage->params.stereoFile;
+    if(aParams.get() == nullptr || !myPlugin->params.ToEnable3D->getValue()) {
+        return false;
+    }
+    StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
+    if(aSrcFormat == StFormat_AUTO) {
+        aSrcFormat = aParams->StereoFormat;
+    }
+    return aSrcFormat != StFormat_Mono && aSrcFormat != StFormat_AUTO;
+}
+
+void StMoviePlayerGUI::updateSrcFormatMenu() {
+    if(myMenuSrcFormat == NULL || myIsSrcMenu3d == isShownIn3d()) {
+        return;
+    }
+    for(StGLWidget* aChild = myMenuSrcFormat->getChildren()->getStart(); aChild != NULL;) {
+        StGLWidget* anItem = aChild;
+        aChild = aChild->getNext();
+        delete anItem;
+    }
+    fillSrcFormatMenu(myMenuSrcFormat);
+    myMenuSrcFormat->stglInit();
+}
+
+/**
+ * Root -> 3D menu: the options of the Stereo KWin build.
+ */
+StGLMenu* StMoviePlayerGUI::create3dMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem(myPlugin->params.ToEnable3D);
+
+    StGLMenu* aMenuRes = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    const std::vector<StString>& aValues = myPlugin->params.RenderResolution->getValues();
+    for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
+        aMenuRes->addItem(aValues[aValIter], myPlugin->params.RenderResolution, int32_t(aValIter));
+    }
+    aMenu->addItem(myPlugin->params.RenderResolution->getName(), aMenuRes);
+    aMenu->addItem(tr(MENU_3D_DISPLAY_SETTINGS))
+         ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenDisplaySettings);
+    return aMenu;
+}
+#endif
 
 void StMoviePlayerGUI::doDisplayStereoFormatCombo(const size_t ) {
     StGLCombobox::ListBuilder aBuilder(this);
@@ -561,21 +621,25 @@ void StMoviePlayerGUI::updateRecentMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createViewMenu() {
     StGLMenu* aMenuView = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    StGLMenu* aMenuDispMode  = createDisplayModeMenu();
     StGLMenu* aMenuDispRatio = createDisplayRatioMenu();
     StGLMenu* aMenuPanorama  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     fillPanoramaMenu(aMenuPanorama);
     StGLMenu* aMenuTexFilter = createSmoothFilterMenu();
     StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
+#ifndef ST_HAVE_STEREO_KWIN
+    StGLMenu* aMenuDispMode  = createDisplayModeMenu();
     StGLMenu* aMenu3dAdjust  = create3dAdjustMenu();
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
+#endif
     if(myWindow->hasFullscreenMode()) {
         aMenuView->addItem(myPlugin->params.IsFullscreen);
     }
     aMenuView->addItem(tr(MENU_VIEW_RESET), myImage->getActions()[StGLImageRegion::Action_Reset])
              ->setIcon(stCMenuIcon("actionResetPlacement"), false);
+#ifndef ST_HAVE_STEREO_KWIN
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.SwapLR);
+#endif
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
              ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
     aMenuView->addItem(tr(MENU_VIEW_PANORAMA),      aMenuPanorama)
@@ -584,8 +648,12 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
              ->setIcon(stCMenuIcon("actionInterpolation"), false);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust)
              ->setIcon(stCMenuIcon("actionColorAdjust"), false);
+#ifdef ST_HAVE_STEREO_KWIN
+    aMenuView->addItem(tr(MENU_FPS), createFpsMenu());
+#else
     aMenuView->addItem("3D Stereo",  aMenu3dAdjust)
              ->setIcon(stCMenuIcon("actionStereo3dSettings"), false);
+#endif
     return aMenuView;
 }
 
@@ -1642,6 +1710,8 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer* thePlugin,
   myPlayList(NULL),
   // main menu
   myMenuRoot(NULL),
+  myMenuSrcFormat(NULL),
+  myIsSrcMenu3d(false),
   myMenuOpenAL(NULL),
   myMenuRecent(NULL),
   // upper toolbar
@@ -2055,9 +2125,19 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     setWidgetOpacity(mySeekBar, hasBottomPanel ? anOpacity : 0.0f, false);
     setWidgetOpacity(myPanelBottom, hasBottomPanel ? anOpacity : 0.0f, true);
 
+#ifdef ST_HAVE_STEREO_KWIN
+    const bool isShown3d = isShownIn3d();
+    updateSrcFormatMenu();
+#else
+    const bool isShown3d = has3dInput;
+#endif
     if(toShowAdjust) {
         setWidgetOpacity(myAdjustOverlay, anOpacity, true);
+#ifdef ST_HAVE_STEREO_KWIN
+        if(true) { // no eye separation in this build
+#else
         if(!has3dInput) {
+#endif
             setWidgetOpacity(myBtnSepDx, 0.0f, false);
             setWidgetOpacity(myBtnSepDy, 0.0f, false);
             setWidgetOpacity(myBtnSepRot, 0.0f, false);
@@ -2099,7 +2179,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         }
         myBtnFullScr->setFaceId(aFirstFace + (myPlugin->params.IsFullscreen->getValue() ? 1 : 0));
     }
-    setWidgetOpacity(myBtnSwapLR, has3dInput ? anOpacity : 0.0f, false);
+    setWidgetOpacity(myBtnSwapLR, isShown3d ? anOpacity : 0.0f, false);
 
     ///
 
@@ -2472,9 +2552,15 @@ void StMoviePlayerGUI::doResetHotKeys(const size_t ) {
 void StMoviePlayerGUI::doListHotKeys(const size_t ) {
     const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
+#ifdef ST_HAVE_STEREO_KWIN
+    (void )aRend;
+    aParams.push_back(myPlugin->params.ToEnable3D);
+    aParams.push_back(myPlugin->params.RenderResolution);
+#else
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
+#endif
     aParams.push_back(myPlugin->params.ToShowFps);
     aParams.push_back(myLangMap->params.language);
     aParams.push_back(myPlugin->params.IsMobileUI);
@@ -2515,11 +2601,18 @@ void StMoviePlayerGUI::doChangeHotKey2(const size_t theId) {
 void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
+#ifdef ST_HAVE_STEREO_KWIN
+    (void )aRend;
+    aParams.push_back(myPlugin->params.ToEnable3D);
+    aParams.push_back(myPlugin->params.RenderResolution);
+    aParams.push_back(myPlugin->params.ToStickPanorama);
+#else
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);
     aParams.push_back(myPlugin->params.ToStickPanorama);
     aParams.push_back(myPlugin->params.ToSwapJPS);
     aRend->getOptions(aParams);
+#endif
     aParams.push_back(myPlugin->params.ToShowFps);
     aParams.push_back(myPlugin->params.UseGpu);
     if(myPlugin->hasAlHintOutput()) {

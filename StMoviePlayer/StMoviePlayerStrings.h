@@ -168,6 +168,14 @@ namespace StMoviePlayerStrings {
         MENU_FPS_METER      = 1421,
         MENU_FPS_BOUND      = 1422,
 
+        // Root -> 3D menu of the Stereo KWin build
+        MENU_3D                   = 1460,
+        MENU_3D_ENABLE            = 1461,
+        MENU_3D_RENDER_RESOLUTION = 1462,
+        MENU_3D_RESOLUTION_OWN    = 1463,
+        MENU_3D_DISPLAY_SETTINGS  = 1464,
+        MENU_3D_SWAP_EYES         = 1465,
+
         // Root -> Help menu
         MENU_HELP = 1500,
         MENU_HELP_ABOUT   = 1501,

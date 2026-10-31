@@ -228,13 +228,21 @@ void StImageViewerGUI::createMainMenu() {
 
     StGLMenu* aMenuMedia   = createMediaMenu();  // Root -> Media  menu
     StGLMenu* aMenuView    = createViewMenu();   // Root -> View   menu
+#ifdef ST_HAVE_STEREO_KWIN
+    StGLMenu* aMenu3d      = create3dMenu();     // Root -> 3D     menu
+#else
     StGLMenu* aDevicesMenu = createOutputMenu(); // Root -> Output menu
+#endif
     StGLMenu* aMenuHelp    = createHelpMenu();   // Root -> Help   menu
 
     // Attach sub menus to root
     myMenuRoot->addItem(tr(MENU_MEDIA), aMenuMedia);
     myMenuRoot->addItem(tr(MENU_VIEW),  aMenuView);
+#ifdef ST_HAVE_STEREO_KWIN
+    myMenuRoot->addItem(tr(MENU_3D),    aMenu3d);
+#else
     myMenuRoot->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
+#endif
     myMenuRoot->addItem(tr(MENU_HELP),  aMenuHelp);
 }
 
@@ -244,6 +252,7 @@ void StImageViewerGUI::createMainMenu() {
 StGLMenu* StImageViewerGUI::createMediaMenu() {
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu(); // Root -> Media -> Source format menu
+    myMenuSrcFormat = aMenuSrcFormat;
     StGLMenu* aMenuOpenImage = createOpenImageMenu(); // Root -> Media -> Open image menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu(); // Root -> Media -> Save image menu
 
@@ -327,7 +336,58 @@ void StImageViewerGUI::fillSrcFormatMenu(StGLMenu* theMenu) {
            ->setIcon(stCMenuIcon("menuGreenMagentaLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.SrcStereoFormat, StFormat_AnaglyphYellowBlue)
            ->setIcon(stCMenuIcon("menuYellowBlueLR"));
+#ifdef ST_HAVE_STEREO_KWIN
+    myIsSrcMenu3d = isShownIn3d();
+    if(myIsSrcMenu3d) {
+        theMenu->addItem(tr(MENU_3D_SWAP_EYES), myImage->params.SwapLR);
+    }
+#endif
 }
+
+#ifdef ST_HAVE_STEREO_KWIN
+bool StImageViewerGUI::isShownIn3d() const {
+    const std::shared_ptr<StStereoParams>& aParams = myImage->params.stereoFile;
+    if(aParams.get() == nullptr || !myPlugin->params.ToEnable3D->getValue()) {
+        return false;
+    }
+    StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
+    if(aSrcFormat == StFormat_AUTO) {
+        aSrcFormat = aParams->StereoFormat;
+    }
+    return aSrcFormat != StFormat_Mono && aSrcFormat != StFormat_AUTO;
+}
+
+void StImageViewerGUI::updateSrcFormatMenu() {
+    if(myMenuSrcFormat == NULL || myIsSrcMenu3d == isShownIn3d()) {
+        return;
+    }
+    for(StGLWidget* aChild = myMenuSrcFormat->getChildren()->getStart(); aChild != NULL;) {
+        StGLWidget* anItem = aChild;
+        aChild = aChild->getNext();
+        delete anItem;
+    }
+    fillSrcFormatMenu(myMenuSrcFormat);
+    myMenuSrcFormat->stglInit();
+}
+
+/**
+ * Root -> 3D menu: the options of the Stereo KWin build.
+ */
+StGLMenu* StImageViewerGUI::create3dMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem(myPlugin->params.ToEnable3D);
+
+    StGLMenu* aMenuRes = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    const std::vector<StString>& aValues = myPlugin->params.RenderResolution->getValues();
+    for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
+        aMenuRes->addItem(aValues[aValIter], myPlugin->params.RenderResolution, int32_t(aValIter));
+    }
+    aMenu->addItem(myPlugin->params.RenderResolution->getName(), aMenuRes);
+    aMenu->addItem(tr(MENU_3D_DISPLAY_SETTINGS))
+         ->signals.onItemClick.connect(myPlugin, &StImageViewer::doOpenDisplaySettings);
+    return aMenu;
+}
+#endif
 
 void StImageViewerGUI::doDisplayStereoFormatCombo(const size_t ) {
     StGLCombobox::ListBuilder aBuilder(this);
@@ -340,22 +400,26 @@ void StImageViewerGUI::doDisplayStereoFormatCombo(const size_t ) {
  */
 StGLMenu* StImageViewerGUI::createViewMenu() {
     StGLMenu* aMenuView = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    StGLMenu* aMenuDispMode  = createDisplayModeMenu();
     StGLMenu* aMenuDispRatio = createDisplayRatioMenu();
     StGLMenu* aMenuPanorama  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     fillPanoramaMenu(aMenuPanorama);
     StGLMenu* aMenuTexFilter = createSmoothFilterMenu();
     StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
+#ifndef ST_HAVE_STEREO_KWIN
+    StGLMenu* aMenuDispMode  = createDisplayModeMenu();
     StGLMenu* aMenu3dAdjust  = create3dAdjustMenu();
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
+#endif
     if(myWindow->hasFullscreenMode()) {
         aMenuView->addItem(myPlugin->params.IsFullscreen);
     }
 
     aMenuView->addItem(tr(MENU_VIEW_RESET), myImage->getActions()[StGLImageRegion::Action_Reset])
              ->setIcon(stCMenuIcon("actionResetPlacement"), false);
+#ifndef ST_HAVE_STEREO_KWIN
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.SwapLR);
+#endif
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
              ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
     aMenuView->addItem(tr(MENU_VIEW_PANORAMA),      aMenuPanorama)
@@ -364,8 +428,13 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
              ->setIcon(stCMenuIcon("actionInterpolation"), false);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust)
              ->setIcon(stCMenuIcon("actionColorAdjust"), false);
+#ifdef ST_HAVE_STEREO_KWIN
+    aMenuView->addItem(myPlugin->params.ToShowFps);
+    aMenuView->addItem(myPlugin->params.IsVSyncOn);
+#else
     aMenuView->addItem("3D Stereo",  aMenu3dAdjust)
              ->setIcon(stCMenuIcon("actionStereo3dSettings"), false);
+#endif
     return aMenuView;
 }
 
@@ -762,9 +831,15 @@ void StImageViewerGUI::doResetHotKeys(const size_t ) {
 void StImageViewerGUI::doListHotKeys(const size_t ) {
     const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
+#ifdef ST_HAVE_STEREO_KWIN
+    (void )aRend;
+    aParams.push_back(myPlugin->params.ToEnable3D);
+    aParams.push_back(myPlugin->params.RenderResolution);
+#else
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
+#endif
     aParams.push_back(myPlugin->params.ToShowFps);
     aParams.push_back(myLangMap->params.language);
     aParams.push_back(myPlugin->params.IsMobileUI);
@@ -805,13 +880,21 @@ void StImageViewerGUI::doChangeHotKey2(const size_t theId) {
 void StImageViewerGUI::doMobileSettings(const size_t ) {
     const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
+#ifdef ST_HAVE_STEREO_KWIN
+    (void )aRend;
+    aParams.push_back(myPlugin->params.ToEnable3D);
+    aParams.push_back(myPlugin->params.RenderResolution);
+#else
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
+#endif
     aParams.push_back(myPlugin->params.ToStickPanorama);
     aParams.push_back(myPlugin->params.ToFlipCubeZ6x1);
     aParams.push_back(myPlugin->params.ToFlipCubeZ3x2);
+#ifndef ST_HAVE_STEREO_KWIN
     aParams.push_back(myPlugin->params.ToSwapJPS);
+#endif
     aParams.push_back(myPlugin->params.ToShowFps);
     aParams.push_back(myPlugin->params.SlideShowDelay);
     aParams.push_back(myLangMap->params.language);
@@ -1271,6 +1354,8 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myPlayList(NULL),
   //
   myMenuRoot(NULL),
+  myMenuSrcFormat(NULL),
+  myIsSrcMenu3d(false),
   //
   myPanelUpper(NULL),
   myPanelBottom(NULL),
@@ -1484,9 +1569,19 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     setWidgetOpacity(myMenuRoot, hasMainMenu ? anOpacity : 0.0f, true);
     setWidgetOpacity(myPanelUpper, hasUpperPanel ? anOpacity : 0.0f, true);
     setWidgetOpacity(myPanelBottom, hasBottomPanel ? anOpacity : 0.0f, true);
+#ifdef ST_HAVE_STEREO_KWIN
+    const bool isShown3d = isShownIn3d();
+    updateSrcFormatMenu();
+#else
+    const bool isShown3d = aSrcFormat != StFormat_Mono;
+#endif
     if(toShowAdjust) {
         setWidgetOpacity(myAdjustOverlay, anOpacity, true);
+#ifdef ST_HAVE_STEREO_KWIN
+        if(true) { // no eye separation in this build
+#else
         if(aSrcFormat == StFormat_Mono) {
+#endif
             setWidgetOpacity(myBtnSepDx, 0.0f, false);
             setWidgetOpacity(myBtnSepDy, 0.0f, false);
             setWidgetOpacity(myBtnSepRot, 0.0f, false);
@@ -1525,7 +1620,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     if(myBtnSrcFrmt != NULL) {
         myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
     }
-    setWidgetOpacity(myBtnSwapLR, aSrcFormat != StFormat_Mono ? myPanelUpper->getOpacity() : 0.0f, false);
+    setWidgetOpacity(myBtnSwapLR, isShown3d ? myPanelUpper->getOpacity() : 0.0f, false);
 
     const StViewSurface aViewMode = aParams.get() != nullptr
                                   ? aParams->ViewingMode
