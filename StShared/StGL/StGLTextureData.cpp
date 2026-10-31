@@ -549,8 +549,13 @@ void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
         case StFormat_SideBySide_RL:
         case StFormat_Quincunx:
         case StFormat_Quincunx_RL: {
-            // side by side with quincunx sampling: each half already holds its own view's samples
+            // side by side with quincunx sampling: each half already holds its own view's samples,
+            // half the view's width (H.264 D.2.26, quincunx_sampling_flag)
             const bool isLeftFirst = mySrcFormat == StFormat_SideBySide_LR || mySrcFormat == StFormat_Quincunx;
+            if(mySrcFormat == StFormat_Quincunx || mySrcFormat == StFormat_Quincunx_RL) {
+                myDataL.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
+                myDataR.setPixelRatio(theDataL.getPixelRatio() * 2.0f);
+            }
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromParallel(theDataL.getPlane(aPlaneId), aDataDispl,
