@@ -602,8 +602,24 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
     return true;
 }
 
+bool StJpegParser::isJpsFormat(const StFormat theFormat) {
+    switch(theFormat) {
+        case StFormat_Mono:
+        case StFormat_SideBySide_LR:
+        case StFormat_SideBySide_RL:
+        case StFormat_TopBottom_LR:
+        case StFormat_TopBottom_RL:
+        case StFormat_Rows:
+        case StFormat_AnaglyphRedCyan:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool StJpegParser::setupJps(const StFormat theFormat) {
-    if(myBuffer == NULL) {
+    if(myBuffer == NULL
+    || !isJpsFormat(theFormat)) {
         return false;
     }
 
