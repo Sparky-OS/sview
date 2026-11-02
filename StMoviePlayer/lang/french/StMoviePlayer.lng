@@ -298,3 +298,6 @@
 2110=Le flux vidéo lui-même déclare la disposition {0}, et les lecteurs lisent la déclaration du flux avant celle du conteneur : le fichier est resté tel quel.\nVotre choix reste associé à ce fichier dans sView.
 2111=Après l'écriture, le fichier ne se relisait pas avec la disposition {0} : sView a remis sa marque 3D telle qu'elle était.\nVotre choix reste associé à ce fichier dans sView.
 2112=Le fichier porte maintenant la disposition 3D {0}.
+2113=Enregistrement de la disposition 3D dans le fichier
+2114=Enregistrer la disposition 3D {0} dans ce fichier ?
+6067=Enregistrer la disposition 3D dans le fichier

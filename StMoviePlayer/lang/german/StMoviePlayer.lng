@@ -298,3 +298,6 @@
 2110=Der Videostrom selbst gibt die Anordnung {0} an, und Player lesen die Angabe des Stroms vor der des Containers, daher blieb die Datei unverändert.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
 2111=Nach dem Schreiben las sich die Datei nicht mit der Anordnung {0} zurück, daher hat sView ihre 3D-Kennzeichnung wiederhergestellt.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
 2112=Die Datei enthält jetzt die 3D-Anordnung {0}.
+2113=3D-Anordnung in die Datei schreiben
+2114=Die 3D-Anordnung {0} in diese Datei schreiben?
+6067=3D-Anordnung in die Datei schreiben

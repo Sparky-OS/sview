@@ -298,3 +298,6 @@
 2110=The video stream itself declares the layout {0}, and players read the stream's declaration before the container's, so the file was left as it was.\nYour choice stays with this file in sView.
 2111=After writing, the file did not read back with the layout {0}, so sView put its 3D mark back as it was.\nYour choice stays with this file in sView.
 2112=The file now carries the 3D layout {0}.
+2113=Saving the 3D layout into the file
+2114=Save the 3D layout {0} into this file?
+6067=Save the 3D layout into the file

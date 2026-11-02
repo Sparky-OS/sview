@@ -422,6 +422,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Your choice stays with this file in sView.");
     theStrings(SAVE_VIDEO_SAVED,
                "The file now carries the 3D layout {0}.");
+    theStrings(SAVE_VIDEO_TITLE,
+               "Saving the 3D layout into the file");
+    theStrings(SAVE_VIDEO_QUESTION,
+               "Save the 3D layout {0} into this file?");
     theStrings(DIALOG_NO_SNAPSHOT,
                "Snapshot not available!");
     theStrings(DIALOG_SAVE_SNAPSHOT,
@@ -734,6 +738,9 @@ void loadDefaults(StLangMap& theStrings) {
     addAction(theStrings, StMoviePlayer::Action_ShowGUI,
               "DoShowGUI",
               "Show/hide GUI");
+    addAction(theStrings, StMoviePlayer::Action_SaveFileInfo,
+              "DoSaveFileInfo",
+              "Save the 3D layout into the file");
 
     theStrings.addAlias("DoOutStereoNormal",       MENU_VIEW_DISPLAY_MODE_STEREO);
     theStrings.addAlias("DoOutStereoLeftView",     MENU_VIEW_DISPLAY_MODE_LEFT);

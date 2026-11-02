@@ -28,3 +28,6 @@
 2110=Sam strumień wideo deklaruje układ {0}, a odtwarzacze czytają deklarację strumienia przed deklaracją kontenera, więc plik pozostał bez zmian.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
 2111=Po zapisie plik nie odczytał się z układem {0}, więc sView przywrócił jego znacznik 3D do poprzedniego stanu.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
 2112=Plik zawiera teraz układ 3D {0}.
+2113=Zapisywanie układu 3D w pliku
+2114=Zapisać układ 3D {0} w tym pliku?
+6067=Zapisz układ 3D w pliku

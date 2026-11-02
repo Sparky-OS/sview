@@ -1171,7 +1171,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
             aText->setTextColor(anExtraColor);
             aText->stglInitAutoHeightWidth(aTextMaxWidth);
         }
-        if(!aSrcInfo.isEmpty() && !anExtraInfo->IsSavable) {
+        if(hasCorrection(*anExtraInfo, *aParams) && !anExtraInfo->IsSavable) {
             // the layout cannot be saved into this file: say why instead of offering it
             StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
             StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
@@ -1219,13 +1219,62 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     }
 
     if(anExtraInfo->IsSavable
-    && !aSrcInfo.isEmpty()) {
+    && anExtraInfo->HasVideo
+    && hasCorrection(*anExtraInfo, *aParams)) {
         // offer to write the person's correction into the file
         StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
         aSaveBtn->setUserData(1);
         aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doSaveFileInfo);
     }
     aDialog->addButton(tr(BUTTON_CLOSE));
+    aDialog->stglInit();
+    setModalDialog(aDialog);
+}
+
+bool StMoviePlayerGUI::hasCorrection(const StMovieInfo& theInfo, const StStereoParams& theParams) {
+    const StFormat anActiveFormat = theParams.ToSwapLR ? st::formatReversed(theParams.StereoFormat) : theParams.StereoFormat;
+    if(theInfo.StInfoStream == StFormat_AUTO) {
+        return anActiveFormat != StFormat_Mono
+            && anActiveFormat != StFormat_SeparateFrames;
+    } else if(theInfo.StInfoStream == StFormat_FrameSequence && anActiveFormat == StFormat_FrameSequence) {
+        // a frame sequence keeps its format when swapped: the eye order is the correction
+        return theParams.ToSwapLR;
+    }
+    return theInfo.StInfoStream != anActiveFormat;
+}
+
+void StMoviePlayerGUI::doSaveFileInfoBegin(const size_t ) {
+    std::shared_ptr<StMovieInfo>& anExtraInfo = myPlugin->myFileInfo;
+    if(anExtraInfo.get() != nullptr) {
+        return; // already opened
+    }
+
+    std::shared_ptr<StFileNode>     aFileNode;
+    std::shared_ptr<StStereoParams> aParams;
+    if(!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
+    ||  anExtraInfo.get() == nullptr
+    || !anExtraInfo->HasVideo) {
+        anExtraInfo.reset();
+        myPlugin->myMsgQueue->pushInfo(tr(DIALOG_FILE_NOINFO));
+        return;
+    }
+    const StFormat anActiveSrcFormat = aParams->ToSwapLR
+                                     ? st::formatReversed(aParams->StereoFormat)
+                                     : aParams->StereoFormat;
+    if(!anExtraInfo->IsSavable) {
+        myPlugin->myMsgQueue->pushInfo(anExtraInfo->FormatName.isEmpty() || StFileNode::isFileExists(anExtraInfo->VideoPath)
+                                     ? tr(SAVE_VIDEO_CONTAINER).format(anExtraInfo->FormatLongName)
+                                     : tr(SAVE_VIDEO_NOT_LOCAL));
+        anExtraInfo.reset();
+        return;
+    }
+
+    StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(SAVE_VIDEO_TITLE), scale(512), scale(256));
+    aDialog->setText(tr(SAVE_VIDEO_QUESTION).format(trSrcFormat(anActiveSrcFormat)) + "\n" + anExtraInfo->VideoPath);
+    StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA), true);
+    aSaveBtn->setUserData(1);
+    aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doSaveFileInfo);
+    aDialog->addButton(tr(BUTTON_CANCEL));
     aDialog->stglInit();
     setModalDialog(aDialog);
 }

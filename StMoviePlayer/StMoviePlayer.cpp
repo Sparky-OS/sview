@@ -578,6 +578,11 @@ StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr
         addAction(Action_FileInfo, anAction, ST_VK_I);
     }
     {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSaveFileInfo"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSaveFileInfoBegin));
+        addAction(Action_SaveFileInfo, anAction, ST_VK_I | ST_VF_SHIFT);
+    }
+    {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListFirst"), 0);
         anAction->setSlot(stSlot(this, &StMoviePlayer::doListFirst));
         addAction(Action_ListFirst, anAction, ST_VK_HOME);
@@ -2384,6 +2389,12 @@ void StMoviePlayer::doSaveFileInfo(const size_t theToSave) {
         saveFileInfo(myFileInfo);
     }
     myFileInfo.reset();
+}
+
+void StMoviePlayer::doSaveFileInfoBegin(const size_t ) {
+    if(myGUI.get() != nullptr) {
+        myGUI->doSaveFileInfoBegin(0);
+    }
 }
 
 void StMoviePlayer::saveFileInfo(const std::shared_ptr<StMovieInfo>& theInfo) {

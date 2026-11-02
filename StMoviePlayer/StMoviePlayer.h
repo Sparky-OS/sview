@@ -136,6 +136,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doOpen2Files(const size_t dummy = 0);
     ST_LOCAL void doSaveFileInfo(const size_t theToSave);
     ST_LOCAL void saveFileInfo(const std::shared_ptr<StMovieInfo>& theInfo);
+    ST_LOCAL void doSaveFileInfoBegin(const size_t dummy = 0);
     ST_LOCAL void doOpenRecent(const size_t theItemId);
     ST_LOCAL void doClearRecent(const size_t dummy = 0);
     ST_LOCAL void doUpdateOpenALDeviceList(const size_t dummy = 0);
@@ -398,6 +399,7 @@ class StMoviePlayer : public StApplication {
         Action_OutStereoRightView,
         Action_OutStereoParallelPair,
         Action_OutStereoCrossEyed,
+        Action_SaveFileInfo,
     };
 
         private: //! @name Web UI methods

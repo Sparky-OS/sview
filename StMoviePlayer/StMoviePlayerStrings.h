@@ -255,6 +255,8 @@ namespace StMoviePlayerStrings {
         SAVE_VIDEO_STREAM_DECLARES = 2110,
         SAVE_VIDEO_READ_BACK       = 2111,
         SAVE_VIDEO_SAVED           = 2112,
+        SAVE_VIDEO_TITLE           = 2113,
+        SAVE_VIDEO_QUESTION        = 2114,
 
         // About dialog
         ABOUT_DPLUGIN_NAME     = 3000,

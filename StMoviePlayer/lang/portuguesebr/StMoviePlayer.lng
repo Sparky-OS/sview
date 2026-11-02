@@ -28,3 +28,6 @@
 2110=O próprio fluxo de vídeo declara o formato {0}, e os players leem a declaração do fluxo antes da do contêiner, então o arquivo ficou como estava.\nSua escolha continua guardada para este arquivo no sView.
 2111=Depois da gravação, o arquivo não foi lido de volta com o formato {0}, então o sView devolveu a marca 3D dele ao que era.\nSua escolha continua guardada para este arquivo no sView.
 2112=O arquivo agora traz o formato 3D {0}.
+2113=Gravando o formato 3D no arquivo
+2114=Gravar o formato 3D {0} neste arquivo?
+6067=Gravar o formato 3D no arquivo

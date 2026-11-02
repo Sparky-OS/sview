@@ -28,6 +28,8 @@
 
 // forward declarations
 class StMoviePlayer;
+struct StMovieInfo;
+class StStereoParams;
 class StGLFpsLabel;
 class StGLDescription;
 class StGLImageRegion;
@@ -138,6 +140,12 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void updateRecentMenu();
 
     ST_LOCAL void doAboutFile(const size_t );
+    ST_LOCAL void doSaveFileInfoBegin(const size_t );
+
+    /**
+     * Return true when the layout shown differs from what the file declares, so there is a correction to save.
+     */
+    ST_LOCAL static bool hasCorrection(const StMovieInfo& theInfo, const StStereoParams& theParams);
 
         private: //! @name desktop interface creation routines
 
