@@ -152,6 +152,25 @@ void StTranslations::reload() {
                 params.language->setValue(int32_t(anIdInList));
                 isLangSet = true;
             }
+        } else if (aLang.isEqualsIgnoreCase(stCString("pt"))) {
+            // the Brazilian translation serves every Portuguese territory
+            if (isInLangFolderList(stCString("PortugueseBR"), anIdInList)
+             || isInLangFolderList(stCString("portuguesebr"), anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        } else if (aLang.isEqualsIgnoreCase(stCString("pl"))) {
+            if (isInLangFolderList(stCString("Polish"), anIdInList)
+             || isInLangFolderList(stCString("polish"), anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        } else if (aLang.isEqualsIgnoreCase(stCString("ja"))) {
+            if (isInLangFolderList(stCString("Japanese"), anIdInList)
+             || isInLangFolderList(stCString("japanese"), anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
         } else if (aLang.isEqualsIgnoreCase(stCString("cs"))) {
             if (isInLangFolderList(stCString("Čeština"), anIdInList)) {
                 params.language->setValue(int32_t(anIdInList));

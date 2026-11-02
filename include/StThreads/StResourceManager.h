@@ -158,6 +158,14 @@ class StResourceManager {
         return myCacheFolder;
     }
 
+#if defined(__linux__) && !defined(__ANDROID__)
+    /**
+     * Return the 2-letters language code (or zh-tw) of the messages language named by the environment
+     * (LANGUAGE, LC_ALL, LC_MESSAGES and LANG), or theDefault for the C locale.
+     */
+    ST_CPPEXPORT static StString languageFromEnvironment(const StString& theDefault);
+#endif
+
     /**
      * 2-letters system language code.
      */

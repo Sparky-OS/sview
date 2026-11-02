@@ -217,7 +217,65 @@ StResourceManager::StResourceManager(const StString& theAppName)
         myLang = "cs";
     }
 #endif
+#if defined(__linux__) && !defined(__ANDROID__)
+    // the C library's locale is left as "C", so the language comes from the environment as gettext reads it
+    myLang = languageFromEnvironment(myLang);
+#endif
 }
+
+#if defined(__linux__) && !defined(__ANDROID__)
+StString StResourceManager::languageFromEnvironment(const StString& theDefault) {
+    // LC_ALL, then LC_MESSAGES, then LANG name the locale; LANGUAGE lists the preferred languages
+    // for any locale but C, which shows the untranslated texts
+    StString aLocale;
+    static const char* THE_LOCALE_VARS[3] = { "LC_ALL", "LC_MESSAGES", "LANG" };
+    for(int aVarIter = 0; aVarIter < 3 && aLocale.isEmpty(); ++aVarIter) {
+        const char* aValue = ::getenv(THE_LOCALE_VARS[aVarIter]);
+        if(aValue != NULL) {
+            aLocale = StString(aValue);
+        }
+    }
+    aLocale.toLowerCase();
+    if(aLocale.isEmpty()
+    || aLocale.isEquals(stCString("c"))
+    || aLocale.isEquals(stCString("posix"))
+    || aLocale.isStartsWith(stCString("c."))) {
+        return theDefault;
+    }
+
+    const char* aLanguages = ::getenv("LANGUAGE");
+    if(aLanguages != NULL && *aLanguages != '\0') {
+        StString aList(aLanguages);
+        aList.toLowerCase();
+        size_t aColon = 0;
+        for(StUtf8Iter anIter = aList.iterator(); *anIter != 0; ++anIter, ++aColon) {
+            if(*anIter == ':') {
+                break;
+            }
+        }
+        if(aColon > 0) {
+            aLocale = aList.subString(0, aColon);
+        }
+    }
+
+    // the language and its territory, without the codeset and the modifier
+    size_t anEnd = 0;
+    for(StUtf8Iter anIter = aLocale.iterator(); *anIter != 0 && *anIter != '.' && *anIter != '@'; ++anIter) {
+        ++anEnd;
+    }
+    const StString aName = aLocale.subString(0, anEnd);
+    if(aName.getLength() < 2) {
+        return theDefault;
+    }
+    if(aName.isStartsWith(stCString("zh"))) {
+        // Chinese keeps its territory: the traditional script for Taiwan, Hong Kong and Macau
+        return (aName.isEquals(stCString("zh_tw")) || aName.isEquals(stCString("zh_hk")) || aName.isEquals(stCString("zh_mo")))
+             ? StString("zh-tw")
+             : StString("zh");
+    }
+    return aName.subString(0, 2);
+}
+#endif
 
 #if defined(__ANDROID__)
 StResourceManager::StResourceManager(AAssetManager*  theAssetMgr,
