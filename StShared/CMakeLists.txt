@@ -48,6 +48,7 @@ set (USED_SRCFILES
   StImage/StImageFile.cpp
   StImage/StImagePlane.cpp
   StImage/StJpegParser.cpp
+  StImage/StPngStereo.cpp
   StImage/StNsImage.cpp
   StImage/StStbImage.cpp
   StImage/StWicImage.cpp
@@ -183,6 +184,7 @@ set (USED_INCFILES
   ../include/StImage/StImageFile.h
   ../include/StImage/StImagePlane.h
   ../include/StImage/StJpegParser.h
+  ../include/StImage/StPngStereo.h
   ../include/StImage/StNsImage.h
   ../include/StImage/StPixelRGB.h
   ../include/StImage/StStbImage.h

@@ -185,6 +185,20 @@ namespace StImageViewerStrings {
         DIALOG_ASSIGN_HOT_KEY  = 2013,
         DIALOG_CONFLICTS_WITH  = 2014,
 
+        // saving the 3D layout into the file: why it was refused, and what to do
+        SAVE_INFO_FILE_TYPE         = 2100,
+        SAVE_INFO_SEPARATE_PICTURES = 2101,
+        SAVE_INFO_TWO_FILES         = 2102,
+        SAVE_INFO_JPS_LAYOUT        = 2103,
+        SAVE_INFO_JPEG_LOSSLESS     = 2104,
+        SAVE_INFO_READ_FAILED       = 2105,
+        SAVE_INFO_WRITE_FAILED      = 2106,
+        SAVE_INFO_PNG_LAYOUT        = 2107,
+        SAVE_INFO_PNG_WIDTH         = 2108,
+        SAVE_INFO_PNG_MONO          = 2109,
+        SAVE_INFO_NOT_PNG           = 2110,
+        SAVE_INFO_SAVED             = 2111,
+
         // About dialog
         ABOUT_DPLUGIN_NAME     = 3000,
         ABOUT_VERSION          = 3001,

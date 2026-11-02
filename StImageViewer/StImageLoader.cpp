@@ -24,7 +24,12 @@
 #include "../StMoviePlayer/StMoviePlayerInfo.h"
 
 #include <StAV/StAVImage.h>
+#include <StImage/StPngStereo.h>
+#include <StFile/StRawFile.h>
 #include <StThreads/StThread.h>
+
+#include <cerrno>
+#include <cstring>
 
 using namespace StImageViewerStrings;
 
@@ -277,6 +282,7 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
     anImgInfo->Path      = aFilePath;
     anImgInfo->ImageType = anImgType;
     anImgInfo->IsSavable = false;
+    anImgInfo->UnsavableReason = theSource->size() >= 2 ? StImageViewerStrings::SAVE_INFO_TWO_FILES : StImageViewerStrings::SAVE_INFO_FILE_TYPE;
 
     StString aTitleString, aFolder;
     if (theSource->size() >= 2) {
@@ -381,7 +387,10 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
             return false;
         }
 
-        anImgInfo->IsSavable = anImg2.get() == nullptr;
+        anImgInfo->IsSavable = anImg2.get() == nullptr && theSource->size() < 2;
+        if (anImg2.get() != nullptr) {
+            anImgInfo->UnsavableReason = StImageViewerStrings::SAVE_INFO_SEPARATE_PICTURES;
+        }
         anImgInfo->StInfoStream = aParser.getSrcFormat();
         if (anImgInfo->StInfoStream != StFormat_AUTO) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
@@ -461,6 +470,9 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         if (theParams->InputFormat == StFormat_AUTO) {
             aSrcFormatCurr = anImgInfo->StInfoStream;
         }
+        // the layout goes into the PNG sTER chunk
+        anImgInfo->IsSavable = anImgType == StImageFile::ST_TYPE_PNG
+                            || anImgType == StImageFile::ST_TYPE_PNS;
     }
     const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();
 
@@ -766,9 +778,8 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
      || theInfo->Path.isEmpty()) {
         myMsgQueue->pushError(tr(DIALOG_NOTHING_TO_SAVE));
         return false;
-    } else if (theInfo->ImageType != StImageFile::ST_TYPE_JPEG
-            && theInfo->ImageType != StImageFile::ST_TYPE_JPS) {
-        myMsgQueue->pushError(stCString("Operation is unavailable for this image type"));
+    } else if (!theInfo->IsSavable) {
+        myMsgQueue->pushError(tr(theInfo->UnsavableReason != 0 ? theInfo->UnsavableReason : size_t(StImageViewerStrings::SAVE_INFO_FILE_TYPE)));
         return false;
     }
 
@@ -776,28 +787,84 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
     if(theInfo->Id->ToSwapLR) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
+    const StString aLayoutName = tr(StImageViewerGUI::trSrcFormatId(aSrcFormat));
+    if (theInfo->ImageType == StImageFile::ST_TYPE_PNG
+     || theInfo->ImageType == StImageFile::ST_TYPE_PNS) {
+        return savePngInfo(theInfo, aSrcFormat, aLayoutName);
+    } else if (theInfo->ImageType != StImageFile::ST_TYPE_JPEG
+            && theInfo->ImageType != StImageFile::ST_TYPE_JPS) {
+        myMsgQueue->pushError(tr(SAVE_INFO_FILE_TYPE));
+        return false;
+    }
+
     if(!StJpegParser::isJpsFormat(aSrcFormat)) {
         // the descriptor would declare the picture monoscopic
-        myMsgQueue->pushError(stCString("Operation is unavailable for this stereoscopic format"));
+        myMsgQueue->pushError(tr(SAVE_INFO_JPS_LAYOUT).format(aLayoutName));
         return false;
     }
 
     StJpegParser aParser;
     if(!aParser.readFile(theInfo->Path)) {
-        myMsgQueue->pushError(tr(DIALOG_NOTHING_TO_SAVE));
+        myMsgQueue->pushError(tr(SAVE_INFO_READ_FAILED).format(theInfo->Path));
         return false;
     }
 
     if(!aParser.setupJps(aSrcFormat)
     && aParser.getSrcFormat() != aSrcFormat) {
         // the JPS section could not be added (it is placed after the quantization table, which a lossless JPEG lacks)
-        myMsgQueue->pushError(StString("File can not be saved at path '") + theInfo->Path + "'!");
+        myMsgQueue->pushError(tr(SAVE_INFO_JPEG_LOSSLESS));
         return false;
     }
     if(!aParser.saveFile(theInfo->Path)) {
-        myMsgQueue->pushError(StString("File can not be saved at path '") + theInfo->Path + "'!");
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, StString(strerror(errno))));
         return false;
     }
+    myMsgQueue->pushInfo(tr(SAVE_INFO_SAVED).format(aLayoutName));
+    return true;
+}
+
+bool StImageLoader::savePngInfo(const std::shared_ptr<StImageInfo>& theInfo,
+                                const StFormat  theFormat,
+                                const StString& theLayoutName) {
+    StRawFile aFile;
+    if(!aFile.readFile(theInfo->Path)) {
+        myMsgQueue->pushError(tr(SAVE_INFO_READ_FAILED).format(theInfo->Path));
+        return false;
+    }
+
+    std::vector<stUByte_t> aResult;
+    uint32_t aWidth = 0;
+    switch(StPngStereo::setupSter(aFile.getBuffer(), aFile.getSize(), theFormat, aResult, aWidth)) {
+        case StPngStereo::Result_Written:
+            break;
+        case StPngStereo::Result_Unchanged:
+            myMsgQueue->pushInfo(tr(SAVE_INFO_SAVED).format(theLayoutName));
+            return true;
+        case StPngStereo::Result_Layout:
+            myMsgQueue->pushError(tr(SAVE_INFO_PNG_LAYOUT).format(theLayoutName));
+            return false;
+        case StPngStereo::Result_Width:
+            myMsgQueue->pushError(tr(SAVE_INFO_PNG_WIDTH).format(StString() + aWidth, StString() + (aWidth / 2)));
+            return false;
+        case StPngStereo::Result_MonoNoMark:
+            myMsgQueue->pushError(tr(SAVE_INFO_PNG_MONO));
+            return false;
+        case StPngStereo::Result_NotPng:
+        default:
+            myMsgQueue->pushError(tr(SAVE_INFO_NOT_PNG).format(theInfo->Path));
+            return false;
+    }
+
+    aFile.freeBuffer();
+    StRawFile anOutput;
+    anOutput.wrapBuffer(aResult.data(), aResult.size());
+    const bool isSaved = anOutput.saveFile(theInfo->Path);
+    const int anError = errno;
+    if(!isSaved) {
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, StString(strerror(anError))));
+        return false;
+    }
+    myMsgQueue->pushInfo(tr(SAVE_INFO_SAVED).format(theLayoutName));
     return true;
 }
 

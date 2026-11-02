@@ -300,6 +300,41 @@ void loadDefaults(StLangMap& theStrings) {
                "Metadata can be saved only into JPEG files.");
     theStrings(DIALOG_NOTHING_TO_SAVE,
                "Nothing to save!");
+    theStrings(SAVE_INFO_FILE_TYPE,
+               "This file type has no place for a 3D layout. sView writes the layout into JPEG files, as a JPS descriptor, and into PNG files, as an sTER chunk.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_INFO_SEPARATE_PICTURES,
+               "Each eye is its own picture in this file, and the file's own tags give their order, which sView does not write.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_INFO_TWO_FILES,
+               "This pair comes from two files, so there is no single file to write the 3D layout into.\n"
+               "Your choice stays with these files in sView.");
+    theStrings(SAVE_INFO_JPS_LAYOUT,
+               "The JPS descriptor cannot describe the layout {0}: it describes side by side, over/under and interlaced rows, each in either eye order, and the red-cyan anaglyph.\n"
+               "Your choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_JPEG_LOSSLESS,
+               "This JPEG is lossless, so it has no place for the 3D descriptor: the JPS section follows the quantization table, and a lossless JPEG has none.\n"
+               "Your choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_READ_FAILED,
+               "sView could not read {0} again to write the 3D layout into it.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_INFO_WRITE_FAILED,
+               "sView could not write {0}: {1}.\n"
+               "Check that the file and its folder can be written, then save again. Your choice stays with this file in sView.");
+    theStrings(SAVE_INFO_PNG_LAYOUT,
+               "A PNG file describes only side by side pictures, in either eye order, with its sTER chunk, so the layout {0} cannot be written into it.\n"
+               "Your choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_PNG_WIDTH,
+               "The sTER chunk cannot describe this PNG as it is: the picture is {0} pixels wide, so its right view starts at column {1}, and the chunk needs a column divisible by 8. Other programs would split the picture in the wrong place.\n"
+               "Your choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_PNG_MONO,
+               "PNG marks only stereo pictures, with the sTER chunk, and this file has none to remove, so a 2D layout cannot be written into it.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_INFO_NOT_PNG,
+               "sView could not read {0} as a PNG file it can rewrite safely, so the file was left as it was.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_INFO_SAVED,
+               "The file now carries the 3D layout {0}.");
     theStrings(DIALOG_NO_SNAPSHOT,
                "Snapshot not available!");
     theStrings(DIALOG_SAVE_SNAPSHOT,

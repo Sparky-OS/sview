@@ -711,7 +711,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     }
     const int aWidthMax  = aDialog->getContent()->getRectPx().width();
     int       aRowLast   = (int )anExtraInfo->Info.size();
-    const int aNbRowsMax = aRowLast + 2;
+    const int aNbRowsMax = aRowLast + 3;
 
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
     aTable->setupTable(aNbRowsMax, 2);
@@ -764,6 +764,16 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
         StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
         aSaveBtn->setUserData(1);
         aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doSaveImageInfo);
+    } else if(!aSrcInfo.isEmpty()) {
+        // the layout cannot be saved into this file: say why instead of offering it
+        StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
+        StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                              StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aText->setText(StString("\n") + tr(anExtraInfo->UnsavableReason != 0 ? anExtraInfo->UnsavableReason : size_t(SAVE_INFO_FILE_TYPE)));
+        aText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+        aText->stglInitAutoHeightWidth(aTextMaxWidth);
+        aTable->updateLayout();
     }
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);

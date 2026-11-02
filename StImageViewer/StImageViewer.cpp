@@ -950,7 +950,9 @@ void StImageViewer::doSaveImageInfoBegin(const size_t ) {
         myFileInfo.reset();
         return;
     } else if(!myFileInfo->IsSavable) {
-        myMsgQueue->pushInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_UNSUPPORTED));
+        myMsgQueue->pushInfo(myLangMap->getValue(myFileInfo->UnsavableReason != 0
+                                               ? myFileInfo->UnsavableReason
+                                               : size_t(StImageViewerStrings::SAVE_INFO_FILE_TYPE)));
         myFileInfo.reset();
         return;
     }

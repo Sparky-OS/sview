@@ -43,8 +43,9 @@ struct StImageInfo {
     StFormat                 StInfoStream;   //!< source format as stored in file metadata
     StFormat                 StInfoFileName; //!< source format detected from file name
     bool                     IsSavable;      //!< indicate that file can be saved without re-encoding
+    size_t                   UnsavableReason;//!< the message saying why the layout cannot be saved into this file
 
-    StImageInfo() : ImageType(StImageFile::ST_TYPE_NONE), StInfoStream(StFormat_AUTO), StInfoFileName(StFormat_AUTO), IsSavable(false) {}
+    StImageInfo() : ImageType(StImageFile::ST_TYPE_NONE), StInfoStream(StFormat_AUTO), StInfoFileName(StFormat_AUTO), IsSavable(false), UnsavableReason(0) {}
 
 };
 
@@ -181,6 +182,9 @@ class StImageLoader {
                             StImageFile::ImageType theImgType);
 
     ST_LOCAL bool saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo);
+    ST_LOCAL bool savePngInfo(const std::shared_ptr<StImageInfo>& theInfo,
+                              const StFormat  theFormat,
+                              const StString& theLayoutName);
 
     ST_LOCAL int getSnapshot(StImage* outDataLeft, StImage* outDataRight, bool isForce = false) {
         return myTextureQueue->getSnapshot(outDataLeft, outDataRight, isForce);
