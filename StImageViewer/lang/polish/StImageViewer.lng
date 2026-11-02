@@ -27,3 +27,13 @@
 2109=PNG oznacza fragmentem sTER tylko obrazy stereo, a ten plik nie ma go do usunięcia, więc nie można w nim zapisać układu 2D.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
 2110=sView nie mógł odczytać pliku {0} jako PNG, który można bezpiecznie przepisać, więc plik pozostał bez zmian.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
 2111=Plik zawiera teraz układ 3D {0}.
+1131=Mono
+1132=Obok siebie (P/L)
+1133=Obok siebie (L/P)
+1134=Góra-dół (P/L)
+1135=Góra-dół (L/P)
+1136=Wiersze (L/P)
+1137=Anaglif czerwono-cyjanowy
+1138=Anaglif zielono-purpurowy
+1139=Anaglif żółto-niebieski
+1142=2 strumienie
