@@ -1422,8 +1422,18 @@ void StImageViewer::doOpenDisplaySettings(const size_t ) {
     // KScreen's module owns every output format, the eye swap included
     std::vector<StString> anArgs;
     anArgs.push_back(stCString("kcm_kscreen"));
-    if(!StProcess::execProcessInPath(stCString("kcmshell6"), anArgs)) {
-        ST_ERROR_LOG("kcmshell6 can not be started");
+    const std::shared_ptr<StMsgQueue> aMsgQueue = myMsgQueue;
+    const StString anExitText = myLangMap->getValue(StImageViewerStrings::MENU_3D_DISPLAY_SETTINGS_EXIT);
+    StString anError;
+    if(!StProcess::startProcessInPath(stCString("kcmshell6"), anArgs, anError, [aMsgQueue, anExitText](int theExitCode) {
+        if(theExitCode != 0) {
+            // a crash or an exit with an error; without the module, kcmshell6 shows its own message and stays open
+            ST_ERROR_LOG(StString("kcmshell6 kcm_kscreen exit code ") + theExitCode);
+            aMsgQueue->pushError(anExitText.format(StString() + theExitCode));
+        }
+    })) {
+        ST_ERROR_LOG(StString("kcmshell6 can not be started: ") + anError);
+        myMsgQueue->pushError(myLangMap->getValue(StImageViewerStrings::MENU_3D_DISPLAY_SETTINGS_FAILED).format(anError));
     }
 }
 #endif

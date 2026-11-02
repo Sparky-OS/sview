@@ -18,6 +18,16 @@
     #include <sys/wait.h>
 #endif
 
+#if defined(__linux__) && !defined(__ANDROID__)
+    #include <spawn.h>
+    #include <cerrno>
+    #include <cstring>
+    #include <string>
+    #include <thread>
+
+    extern char** environ;
+#endif
+
 #if defined(__APPLE__)
     #include <mach-o/dyld.h>
 #elif defined(__linux__)
@@ -357,6 +367,104 @@ bool StProcess::execProcessAny(const StString& theExecutablePath,
     _exit(1);
 #endif
 }
+
+#if defined(__linux__) && !defined(__ANDROID__)
+namespace {
+
+    /**
+     * Start the executable found in PATH; glibc reports a failed exec as the spawn's own error.
+     */
+    static bool spawnInPath(pid_t&                       thePid,
+                            const StString&              theExecutableName,
+                            const std::vector<StString>& theArguments,
+                            const posix_spawn_file_actions_t* theActions,
+                            StString&                    theError) {
+        std::vector<char*> anArgList;
+        anArgList.push_back((char* )theExecutableName.toCString());
+        for(size_t anArgId = 0; anArgId < theArguments.size(); ++anArgId) {
+            anArgList.push_back((char* )theArguments[anArgId].toCString());
+        }
+        anArgList.push_back(nullptr);
+        const int aRes = posix_spawnp(&thePid, theExecutableName.toCString(), theActions, nullptr, anArgList.data(), environ);
+        if(aRes != 0) {
+            theError = StString(strerror(aRes));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Wait for the process and return its exit code, -1 when it was terminated by a signal.
+     */
+    static int waitExitCode(const pid_t thePid) {
+        int aStatus = 0;
+        for(;;) {
+            if(waitpid(thePid, &aStatus, 0) == thePid) {
+                break;
+            } else if(errno != EINTR) {
+                return -1;
+            }
+        }
+        return WIFEXITED(aStatus) ? WEXITSTATUS(aStatus) : -1;
+    }
+
+}
+
+bool StProcess::startProcessInPath(const StString&              theExecutableName,
+                                   const std::vector<StString>& theArguments,
+                                   StString&                    theError,
+                                   const std::function<void(int )>& theOnExit) {
+    pid_t aPid = 0;
+    if(!spawnInPath(aPid, theExecutableName, theArguments, nullptr, theError)) {
+        return false;
+    }
+    std::thread([aPid, theOnExit]() { theOnExit(waitExitCode(aPid)); }).detach();
+    return true;
+}
+
+bool StProcess::runProcessInPath(const StString&              theExecutableName,
+                                 const std::vector<StString>& theArguments,
+                                 int&                         theExitCode,
+                                 StString&                    theOutput,
+                                 StString&                    theError) {
+    theExitCode = -1;
+    theOutput.clear();
+    int aPipe[2] = { -1, -1 };
+    if(pipe(aPipe) != 0) {
+        theError = StString(strerror(errno));
+        return false;
+    }
+    posix_spawn_file_actions_t anActions;
+    posix_spawn_file_actions_init(&anActions);
+    posix_spawn_file_actions_addclose(&anActions, aPipe[0]);
+    posix_spawn_file_actions_adddup2(&anActions, aPipe[1], STDOUT_FILENO);
+    posix_spawn_file_actions_adddup2(&anActions, aPipe[1], STDERR_FILENO);
+    posix_spawn_file_actions_addclose(&anActions, aPipe[1]);
+    pid_t aPid = 0;
+    const bool isStarted = spawnInPath(aPid, theExecutableName, theArguments, &anActions, theError);
+    posix_spawn_file_actions_destroy(&anActions);
+    close(aPipe[1]);
+    if(!isStarted) {
+        close(aPipe[0]);
+        return false;
+    }
+
+    std::string anOutput;
+    char aBuffer[4096];
+    for(;;) {
+        const ssize_t aRead = read(aPipe[0], aBuffer, sizeof(aBuffer));
+        if(aRead > 0) {
+            anOutput.append(aBuffer, size_t(aRead));
+        } else if(aRead == 0 || errno != EINTR) {
+            break;
+        }
+    }
+    close(aPipe[0]);
+    theOutput   = StString(anOutput.c_str());
+    theExitCode = waitExitCode(aPid);
+    return true;
+}
+#endif
 
 bool StProcess::execAndRead(int& theRes,
                             StString& theOutput,

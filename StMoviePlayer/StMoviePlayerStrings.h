@@ -175,6 +175,8 @@ namespace StMoviePlayerStrings {
         MENU_3D_RESOLUTION_OWN    = 1463,
         MENU_3D_DISPLAY_SETTINGS  = 1464,
         MENU_3D_SWAP_EYES         = 1465,
+        MENU_3D_DISPLAY_SETTINGS_FAILED = 1466,
+        MENU_3D_DISPLAY_SETTINGS_EXIT   = 1467,
 
         // Root -> Help menu
         MENU_HELP = 1500,

@@ -9,6 +9,7 @@
 
 #include <StStrings/StDictionary.h>
 
+#include <functional>
 #include <vector>
 
 // compatibility with old definitions
@@ -143,6 +144,37 @@ class StProcess {
                                            const std::vector<StString>& theArguments) {
         return execProcessAny(theExecutableName, theArguments, false);
     }
+
+#if defined(__linux__) && !defined(__ANDROID__)
+    /**
+     * Launch specified process without waiting its termination, and learn how it ends.
+     * Unlike execProcessInPath(), a missing executable is reported.
+     * @param theExecutableName executable name to find in PATH
+     * @param theArguments      arguments list
+     * @param theError          [out] why the executable could not be started
+     * @param theOnExit         called from another thread with the exit code (-1 when terminated by a signal)
+     * @return true if executable has been launched
+     */
+    ST_CPPEXPORT static bool startProcessInPath(const StString&              theExecutableName,
+                                                const std::vector<StString>& theArguments,
+                                                StString&                    theError,
+                                                const std::function<void(int )>& theOnExit);
+
+    /**
+     * Launch specified process and wait its termination.
+     * @param theExecutableName executable name to find in PATH
+     * @param theArguments      arguments list
+     * @param theExitCode       [out] exit code (-1 when terminated by a signal)
+     * @param theOutput         [out] standard output and standard error of the process
+     * @param theError          [out] why the executable could not be started
+     * @return true if executable has been launched
+     */
+    ST_CPPEXPORT static bool runProcessInPath(const StString&              theExecutableName,
+                                              const std::vector<StString>& theArguments,
+                                              int&                         theExitCode,
+                                              StString&                    theOutput,
+                                              StString&                    theError);
+#endif
 
     /**
      * Opens a pipe with specified executable and parameters, reads its output and closes pipe.

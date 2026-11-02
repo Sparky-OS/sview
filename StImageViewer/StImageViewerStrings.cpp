@@ -112,6 +112,12 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(MENU_3D_RESOLUTION_OWN, "The picture's own resolution");
     theStrings(MENU_3D_DISPLAY_SETTINGS, "Display Configuration...");
     theStrings(MENU_3D_SWAP_EYES, "Swap left and right eyes");
+    theStrings(MENU_3D_DISPLAY_SETTINGS_FAILED,
+               "Display Configuration could not be opened: kcmshell6 could not be started ({0}).\n"
+               "Open System Settings and choose Display Configuration, where each screen's 3D mode and eye swap are.");
+    theStrings(MENU_3D_DISPLAY_SETTINGS_EXIT,
+               "Display Configuration closed with an error (kcmshell6 exit code {0}).\n"
+               "Open System Settings and choose Display Configuration, where each screen's 3D mode and eye swap are.");
     theStrings(MENU_VIEW_SWAP_LR,
                "Swap Left/Right");
     theStrings(MENU_VIEW_DISPLAY_RATIO,
