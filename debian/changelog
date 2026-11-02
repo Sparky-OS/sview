@@ -6,7 +6,9 @@ sview (26.9+stereo3d4) UNRELEASED; urgency=medium
     LANG, then LANGUAGE): the C library's locale stayed "C", so a person
     with pt_BR, pl, ja or any other locale saw English. Portuguese,
     Polish and Japanese are matched to their translations; Chinese keeps
-    its territory.
+    its territory. A text a translation lacks is shown in English, no
+    longer behind its id ("[1100]Media"), and the input layouts have
+    Polish, Portuguese and Japanese names.
   * Display Configuration...: a missing kcmshell6, or one that ends with
     an error or a crash, is said, with System Settings > Display
     Configuration as the place to go (without kcm_kscreen, kcmshell6
