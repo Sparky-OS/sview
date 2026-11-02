@@ -829,10 +829,13 @@ void StImageLoader::mainLoop() {
                 if(!saveImageInfo(anInfo)) {
                     break;
                 }
-                // the file now carries the layout and the eye order, so the per-file choices
-                // that were saved into it are cleared before the file is read again
+                // the file now carries the layout, so the per-file packing is cleared before the file is read again;
+                // the eye swap is cleared only when the saved layout carries it (a red-cyan anaglyph has no
+                // reversed layout to write, so its swap stays with the file's other per-file choices)
                 anInfo->Id->InputFormat = StFormat_AUTO;
-                anInfo->Id->setSwapLR(false);
+                if(st::formatReversed(anInfo->Id->StereoFormat) != anInfo->Id->StereoFormat) {
+                    anInfo->Id->setSwapLR(false);
+                }
                 // re-load image file
             }
             ST_FALLTHROUGH
