@@ -384,6 +384,44 @@ void loadDefaults(StLangMap& theStrings) {
                "Active decoders:");
     theStrings(DIALOG_NOTHING_TO_SAVE,
                "Nothing to save!");
+    theStrings(SAVE_VIDEO_CONTAINER,
+               "sView writes the 3D layout into Matroska and WebM files, as StereoMode, and into MP4 and MOV files, as an st3d box. A file in the {0} format has no such place.\n"
+               "Your choice stays with this file in sView. A copy remuxed into Matroska, for example with MKVToolNix, can carry the layout.");
+    theStrings(SAVE_VIDEO_NOT_LOCAL,
+               "This video is not a local file, so sView cannot write into it.\n"
+               "Your choice stays with it in sView.");
+    theStrings(SAVE_VIDEO_MATROSKA_LAYOUT,
+               "Matroska's StereoMode has no value for the layout {0}.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_WEBM_LAYOUT,
+               "WebM allows only mono, side by side and top and bottom, in either eye order, as its StereoMode, so the layout {0} cannot be written into this WebM file.\n"
+               "Your choice stays with this file in sView. A Matroska (.mkv) copy of the video can carry it.");
+    theStrings(SAVE_VIDEO_MP4_LAYOUT,
+               "In an MP4 file, the st3d box can say mono, side by side or top and bottom with the left eye first. Its right-left value is not read by FFmpeg, which sView and most Linux players use. So the layout {0} cannot be written into it.\n"
+               "Your choice stays with this file in sView. A Matroska (.mkv) copy of the video can carry it.");
+    theStrings(SAVE_VIDEO_MP4_NO_ROOM,
+               "This MP4 file keeps its index before the video data, with no free space after it, so the st3d box cannot be added without rewriting the whole file, which sView does not do.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_MP4_ENTRIES,
+               "This MP4 video track has several sample descriptions, and sView writes the st3d box only into a track with one.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_BROKEN,
+               "sView could not read the structure of {0}, so the file was left as it was.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_TOOL_MISSING,
+               "Writing into Matroska and WebM files needs mkvpropedit, from MKVToolNix, which is not installed.\n"
+               "Install the mkvtoolnix package, then save again. Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_WRITE_FAILED,
+               "sView could not write {0}: {1}\n"
+               "Check that the file and its folder can be written, then save again. Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_STREAM_DECLARES,
+               "The video stream itself declares the layout {0}, and players read the stream's declaration before the container's, so the file was left as it was.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_READ_BACK,
+               "After writing, the file did not read back with the layout {0}, so sView put its 3D mark back as it was.\n"
+               "Your choice stays with this file in sView.");
+    theStrings(SAVE_VIDEO_SAVED,
+               "The file now carries the 3D layout {0}.");
     theStrings(DIALOG_NO_SNAPSHOT,
                "Snapshot not available!");
     theStrings(DIALOG_SAVE_SNAPSHOT,

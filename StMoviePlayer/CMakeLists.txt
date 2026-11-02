@@ -11,6 +11,7 @@ set (USED_SRCFILES
   StVideo/StVideo.cpp
   StVideo/StVideoDxva2.cpp
   StVideo/StVideoQueue.cpp
+  StVideo/StVideoStereoMark.cpp
   StVideo/StVideoTimer.cpp
   StVideo/StVideoToolbox.cpp
   StALDeviceParam.cpp
@@ -31,6 +32,7 @@ set (USED_INCFILES
   StVideo/StSubtitlesASS.h
   StVideo/StVideo.h
   StVideo/StVideoQueue.h
+  StVideo/StVideoStereoMark.h
   StVideo/StVideoTimer.h
   StALDeviceParam.h
   StMovieOpenDialog.h

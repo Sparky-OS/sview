@@ -260,6 +260,20 @@ namespace {
 
 }
 
+StFormat StVideoQueue::formatFromStereoTag(const StString& theValue,
+                                           bool&           theIsRightFirst) {
+    theIsRightFirst = false;
+    for(size_t aSrcId = 0;; ++aSrcId) {
+        const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
+        if(aFlag.stID == StFormat_AUTO || aFlag.name == NULL) {
+            return StFormat_AUTO;
+        } else if(theValue == aFlag.name) {
+            theIsRightFirst = theValue == THE_FRAMESEQ_RL;
+            return aFlag.stID;
+        }
+    }
+}
+
 bool StVideoQueue::initCodec(const AVCodec* theCodec,
                              const bool theToUseGpu) {
     // close previous codec

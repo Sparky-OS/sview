@@ -49,8 +49,15 @@ struct StMovieInfo {
     StFormat       StInfoFileName; //!< source format detected from file name
     bool           HasVideo;       //!< true if file contains video
     bool           IsSavable;      //!< indicate that file can be saved without re-encoding
+    bool           IsFrameSeqRightFirst; //!< the stream's frame sequence starts each pair with the right view
+    StString       VideoPath;      //!< the file of the video stream shown
+    StString       FormatName;     //!< its container, as FFmpeg's demuxer names it
+    StString       FormatLongName; //!< its container, in words
+    int            VideoStream;    //!< the video stream's index
+    int            VideoTrack;     //!< its place among the file's video tracks, 1 for the first
 
-    StMovieInfo() : StInfoStream(StFormat_AUTO), StInfoFileName(StFormat_AUTO), HasVideo(false), IsSavable(false) {}
+    StMovieInfo() : StInfoStream(StFormat_AUTO), StInfoFileName(StFormat_AUTO), HasVideo(false), IsSavable(false),
+                    IsFrameSeqRightFirst(false), VideoStream(-1), VideoTrack(1) {}
 
 };
 

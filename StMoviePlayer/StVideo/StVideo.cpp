@@ -17,6 +17,7 @@
  */
 
 #include "StVideo.h"
+#include "StVideoStereoMark.h"
 #include "../StMoviePlayerInfo.h"
 #include "../StMoviePlayerStrings.h"
 
@@ -417,6 +418,24 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 myVideoMaster->setSlave(NULL);
 
                 if(myVideoMaster->isInitialized()) {
+                    // where the layout would be saved: this file, this stream, its container
+                    myFileInfoTmp->VideoPath   = theFileToLoad;
+                    myFileInfoTmp->VideoStream = int(aStreamId);
+                    myFileInfoTmp->VideoTrack  = 1;
+                    for(unsigned int aPrevId = 0; aPrevId < aStreamId; ++aPrevId) {
+                        if(stAV::getCodecType(aFormatCtx->streams[aPrevId]) == AVMEDIA_TYPE_VIDEO
+                        && !stAV::isAttachedPicture(aFormatCtx->streams[aPrevId])) {
+                            ++myFileInfoTmp->VideoTrack;
+                        }
+                    }
+                    myFileInfoTmp->FormatName     = aFormatCtx->iformat->name;
+                    myFileInfoTmp->FormatLongName = aFormatCtx->iformat->long_name != NULL
+                                                  ? StString(aFormatCtx->iformat->long_name)
+                                                  : StString(aFormatCtx->iformat->name);
+                    myFileInfoTmp->IsSavable = StVideoStereoMark::containerOf(myFileInfoTmp->FormatName, theFileToLoad)
+                                            != StVideoStereoMark::Container_Other
+                                            && StFileNode::isFileExists(theFileToLoad);
+
                     myAudio->setTrackHeadOrientation(params.ToTrackHeadAudio->getValue() && theNewParams->ViewingMode != StViewSurface_Plain);
 
                     const int aSizeX      = myVideoMaster->sizeX();
@@ -1426,6 +1445,7 @@ std::shared_ptr<StMovieInfo> StVideo::getFileInfo(const std::shared_ptr<StStereo
     // continuously read source format since it can be stored in frame
     anInfo->StInfoStream   = myVideoMaster->getStereoFormatFromStream();
     anInfo->StInfoFileName = myVideoMaster->getStereoFormatFromName();
+    anInfo->IsFrameSeqRightFirst = myVideoMaster->isFrameSeqRightFirst();
     anInfo->HasVideo  = myVideoMaster->isInitialized();
 
     anInfo->Codecs.clear();

@@ -23,6 +23,7 @@
 
 #include "StALDeviceParam.h"
 #include "StMovieOpenDialog.h"
+#include "StVideo/StVideoStereoMark.h"
 #include "StMoviePlayerGUI.h"
 #include "StMoviePlayerStrings.h"
 #include "StVideo/StVideo.h"
@@ -2380,9 +2381,96 @@ void StMoviePlayer::doSaveFileInfo(const size_t theToSave) {
     if (myGUI.get() != nullptr
      && myFileInfo.get() != nullptr
      && theToSave == 1) {
-        //myLoader->doSaveInfo(myFileInfo);
+        saveFileInfo(myFileInfo);
     }
     myFileInfo.reset();
+}
+
+void StMoviePlayer::saveFileInfo(const std::shared_ptr<StMovieInfo>& theInfo) {
+    const std::shared_ptr<StStereoParams>& aParams = theInfo->Id;
+    if(aParams.get() == nullptr) {
+        return;
+    }
+
+    // the layout shown, with the person's eye swap; a frame sequence keeps its order in its own flag
+    StVideoStereoMark::Request aRequest;
+    aRequest.Path         = theInfo->VideoPath;
+    aRequest.FormatName   = theInfo->FormatName;
+    aRequest.StreamIndex  = theInfo->VideoStream;
+    aRequest.VideoTrack   = theInfo->VideoTrack;
+    aRequest.Format       = aParams->ToSwapLR ? st::formatReversed(aParams->StereoFormat) : aParams->StereoFormat;
+    aRequest.IsRightFirst = aRequest.Format == StFormat_FrameSequence
+                         && theInfo->IsFrameSeqRightFirst != aParams->ToSwapLR;
+    const StString aLayoutName = myGUI->trSrcFormat(aRequest.Format)
+                               + (aRequest.IsRightFirst ? StString(" (R/L)") : StString());
+
+    StFormat aDeclared = StFormat_AUTO;
+    StString aDetails;
+    switch(StVideoStereoMark::save(aRequest, aDeclared, aDetails)) {
+        case StVideoStereoMark::Result_Written:
+        case StVideoStereoMark::Result_Unchanged:
+            break;
+        case StVideoStereoMark::Result_NotLocal:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_NOT_LOCAL));
+            return;
+        case StVideoStereoMark::Result_Container:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_CONTAINER).format(theInfo->FormatLongName));
+            return;
+        case StVideoStereoMark::Result_Layout: {
+            const StVideoStereoMark::Container aContainer = StVideoStereoMark::containerOf(aRequest.FormatName, aRequest.Path);
+            const size_t aTextId = aContainer == StVideoStereoMark::Container_Mp4  ? size_t(StMoviePlayerStrings::SAVE_VIDEO_MP4_LAYOUT)
+                                 : aContainer == StVideoStereoMark::Container_WebM ? size_t(StMoviePlayerStrings::SAVE_VIDEO_WEBM_LAYOUT)
+                                 : size_t(StMoviePlayerStrings::SAVE_VIDEO_MATROSKA_LAYOUT);
+            myMsgQueue->pushError(tr(aTextId).format(aLayoutName));
+            return;
+        }
+        case StVideoStereoMark::Result_Mp4NoRoom:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_MP4_NO_ROOM));
+            return;
+        case StVideoStereoMark::Result_Mp4Entries:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_MP4_ENTRIES));
+            return;
+        case StVideoStereoMark::Result_ToolMissing:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_TOOL_MISSING));
+            return;
+        case StVideoStereoMark::Result_WriteFailed:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_WRITE_FAILED).format(aRequest.Path, aDetails));
+            return;
+        case StVideoStereoMark::Result_StreamDeclares:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_STREAM_DECLARES).format(myGUI->trSrcFormat(aDeclared)));
+            return;
+        case StVideoStereoMark::Result_ReadBack:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_READ_BACK).format(aLayoutName));
+            return;
+        case StVideoStereoMark::Result_Broken:
+        default:
+            myMsgQueue->pushError(tr(StMoviePlayerStrings::SAVE_VIDEO_BROKEN).format(aRequest.Path));
+            return;
+    }
+
+    // the file carries the layout now: the per-file packing goes back to unmarked, and so does the swap
+    // when the written layout carries the eye order (a red-cyan anaglyph has no reversed value)
+    aParams->InputFormat = StFormat_AUTO;
+    if(st::formatReversed(aParams->StereoFormat) != aParams->StereoFormat
+    || aParams->StereoFormat == StFormat_FrameSequence) {
+        aParams->setSwapLR(false);
+    }
+    params.SrcStereoFormat->setValue(StFormat_AUTO);
+    myMsgQueue->pushInfo(tr(StMoviePlayerStrings::SAVE_VIDEO_SAVED).format(aLayoutName));
+
+    // open the file again, at the same place, so its own mark is read
+    double aDuration = 0.0, aPts = 0.0;
+    bool isVideoPlayed = false, isAudioPlayed = false;
+    const bool isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
+    myAudioOnLoad = myVideo->params.activeAudio->getValue();
+    mySubsOnLoad  = myVideo->params.activeSubtitles1->getValue();
+    mySeekOnLoad  = aPts;
+    doUpdateStateLoading();
+    myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+    myVideo->doLoadNext();
+    if(!isPlaying) {
+        myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
+    }
 }
 
 void StMoviePlayer::doOpenRecent(const size_t theItemId) {

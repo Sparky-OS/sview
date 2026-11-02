@@ -1124,13 +1124,14 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     const int    aWidthMax  = aDialog->getContent()->getRectPx().width();
     StGLTable*   aTable     = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
     int          aRowLast   = (int )anExtraInfo->Info.size();
-    const int    aNbRowsMax = aRowLast + (int )anExtraInfo->Codecs.size() + 3;
+    const int    aNbRowsMax = aRowLast + (int )anExtraInfo->Codecs.size() + 4;
     aTable->setupTable((int )aNbRowsMax, 2);
     aTable->fillFromMap(anExtraInfo->Info, aWhite,
                         aWidthMax, aWidthMax / 2);
 
     const int aTextMaxWidth = aWidthMax - (aTable->getItemMargins().left + aTable->getItemMargins().right);
 
+    StString aSrcInfo;
     if(anExtraInfo->HasVideo) {
         // add stereoscopic format info
         const StFormat anActiveSrcFormat = aParams->ToSwapLR
@@ -1145,7 +1146,6 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
 
         // warn about wrong/missing stereoscopic format information
-        StString aSrcInfo;
         StGLVec3 anExtraColor = aWhite;
         if(anExtraInfo->StInfoStream == StFormat_AUTO
         && anActiveSrcFormat != StFormat_Mono
@@ -1169,6 +1169,18 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
                                   StGLTextFormatter::ST_ALIGN_Y_TOP);
             aText->setText(aSrcInfo);
             aText->setTextColor(anExtraColor);
+            aText->stglInitAutoHeightWidth(aTextMaxWidth);
+        }
+        if(!aSrcInfo.isEmpty() && !anExtraInfo->IsSavable) {
+            // the layout cannot be saved into this file: say why instead of offering it
+            StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
+            StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+            aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
+            aText->setText(StString("\n") + (anExtraInfo->FormatName.isEmpty() || StFileNode::isFileExists(anExtraInfo->VideoPath)
+                                             ? tr(SAVE_VIDEO_CONTAINER).format(anExtraInfo->FormatLongName)
+                                             : tr(SAVE_VIDEO_NOT_LOCAL)));
+            aText->setTextColor(aWhite);
             aText->stglInitAutoHeightWidth(aTextMaxWidth);
         }
     }
@@ -1206,6 +1218,13 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         aDialog->getContent()->changeRectPx().right() -= aWidthAdjust;
     }
 
+    if(anExtraInfo->IsSavable
+    && !aSrcInfo.isEmpty()) {
+        // offer to write the person's correction into the file
+        StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
+        aSaveBtn->setUserData(1);
+        aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doSaveFileInfo);
+    }
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->stglInit();
     setModalDialog(aDialog);

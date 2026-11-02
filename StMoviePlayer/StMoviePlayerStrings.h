@@ -241,6 +241,21 @@ namespace StMoviePlayerStrings {
         DIALOG_ASSIGN_HOT_KEY  = 2013,
         DIALOG_CONFLICTS_WITH  = 2014,
 
+        // saving the 3D layout into the file: why it was refused, and what to do
+        SAVE_VIDEO_CONTAINER       = 2100,
+        SAVE_VIDEO_NOT_LOCAL       = 2101,
+        SAVE_VIDEO_MATROSKA_LAYOUT = 2102,
+        SAVE_VIDEO_WEBM_LAYOUT     = 2103,
+        SAVE_VIDEO_MP4_LAYOUT      = 2104,
+        SAVE_VIDEO_MP4_NO_ROOM     = 2105,
+        SAVE_VIDEO_MP4_ENTRIES     = 2106,
+        SAVE_VIDEO_BROKEN          = 2107,
+        SAVE_VIDEO_TOOL_MISSING    = 2108,
+        SAVE_VIDEO_WRITE_FAILED    = 2109,
+        SAVE_VIDEO_STREAM_DECLARES = 2110,
+        SAVE_VIDEO_READ_BACK       = 2111,
+        SAVE_VIDEO_SAVED           = 2112,
+
         // About dialog
         ABOUT_DPLUGIN_NAME     = 3000,
         ABOUT_VERSION          = 3001,

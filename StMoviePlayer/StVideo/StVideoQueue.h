@@ -169,6 +169,19 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * @return stereoscopic information stored in file
      */
+    /**
+     * Return the layout named by the container's stereo mode tag, StFormat_AUTO for an unknown name.
+     */
+    ST_LOCAL static StFormat formatFromStereoTag(const StString& theValue,
+                                                 bool&           theIsRightFirst);
+
+    /**
+     * Return true if the stream's frame sequence starts each pair with the right view.
+     */
+    ST_LOCAL bool isFrameSeqRightFirst() const {
+        return myIsFrameSeqRightFirst;
+    }
+
     ST_LOCAL StFormat getStereoFormatFromStream() const {
         return myStFormatInStream;
     }
