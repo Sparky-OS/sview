@@ -788,7 +788,12 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
         return false;
     }
 
-    aParser.setupJps(aSrcFormat);
+    if(!aParser.setupJps(aSrcFormat)
+    && aParser.getSrcFormat() != aSrcFormat) {
+        // the JPS section could not be added (it is placed after the quantization table, which a lossless JPEG lacks)
+        myMsgQueue->pushError(StString("File can not be saved at path '") + theInfo->Path + "'!");
+        return false;
+    }
     if(!aParser.saveFile(theInfo->Path)) {
         myMsgQueue->pushError(StString("File can not be saved at path '") + theInfo->Path + "'!");
         return false;
