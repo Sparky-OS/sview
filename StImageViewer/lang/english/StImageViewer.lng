@@ -206,3 +206,17 @@
 1463=The picture's own resolution
 1464=Display Configuration...
 1465=Swap left and right eyes
+1466=Display Configuration could not be opened: kcmshell6 could not be started ({0}).\nOpen System Settings and choose Display Configuration, where each screen's 3D mode and eye swap are.
+1467=Display Configuration closed with an error (kcmshell6 exit code {0}).\nOpen System Settings and choose Display Configuration, where each screen's 3D mode and eye swap are.
+2100=This file type has no place for a 3D layout. sView writes the layout into JPEG files, as a JPS descriptor, and into PNG files, as an sTER chunk.\nYour choice stays with this file in sView.
+2101=Each eye is its own picture in this file, and the file's own tags give their order, which sView does not write.\nYour choice stays with this file in sView.
+2102=This pair comes from two files, so there is no single file to write the 3D layout into.\nYour choice stays with these files in sView.
+2103=The JPS descriptor cannot describe the layout {0}: it describes side by side, over/under and interlaced rows, each in either eye order, and the red-cyan anaglyph.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.
+2104=This JPEG is lossless, so it has no place for the 3D descriptor: the JPS section follows the quantization table, and a lossless JPEG has none.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.
+2105=sView could not read {0} again to write the 3D layout into it.\nYour choice stays with this file in sView.
+2106=sView could not write {0}: {1}.\nCheck that the file and its folder can be written, then save again. Your choice stays with this file in sView.
+2107=A PNG file describes only side by side pictures, in either eye order, with its sTER chunk, so the layout {0} cannot be written into it.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.
+2108=The sTER chunk cannot describe this PNG as it is: the picture is {0} pixels wide, so its right view starts at column {1}, and the chunk needs a column divisible by 8. Other programs would split the picture in the wrong place.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.
+2109=PNG marks only stereo pictures, with the sTER chunk, and this file has none to remove, so a 2D layout cannot be written into it.\nYour choice stays with this file in sView.
+2110=sView could not read {0} as a PNG file it can rewrite safely, so the file was left as it was.\nYour choice stays with this file in sView.
+2111=The file now carries the 3D layout {0}.

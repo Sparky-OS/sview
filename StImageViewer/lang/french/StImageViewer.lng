@@ -206,3 +206,17 @@
 1463=Résolution propre de l'image
 1464=Configuration de l'affichage...
 1465=Échanger les yeux gauche et droit
+1466=Impossible d'ouvrir la Configuration de l'affichage : kcmshell6 n'a pas pu être lancé ({0}).\nOuvrez la Configuration du système et choisissez Configuration de l'affichage, où se trouvent le mode 3D et l'échange des yeux de chaque écran.
+1467=La Configuration de l'affichage s'est fermée sur une erreur (code de sortie de kcmshell6 : {0}).\nOuvrez la Configuration du système et choisissez Configuration de l'affichage, où se trouvent le mode 3D et l'échange des yeux de chaque écran.
+2100=Ce type de fichier n'a pas de place pour une disposition 3D. sView écrit la disposition dans les fichiers JPEG, comme descripteur JPS, et dans les fichiers PNG, comme bloc sTER.\nVotre choix reste associé à ce fichier dans sView.
+2101=Dans ce fichier, chaque œil est une image à part, et ce sont les balises du fichier qui en donnent l'ordre ; sView ne les écrit pas.\nVotre choix reste associé à ce fichier dans sView.
+2102=Cette paire provient de deux fichiers : il n'y a donc pas de fichier unique où écrire la disposition 3D.\nVotre choix reste associé à ces fichiers dans sView.
+2103=Le descripteur JPS ne peut pas décrire la disposition {0} : il décrit le côte à côte, le dessus/dessous et les lignes entrelacées, chacun dans l'un ou l'autre ordre des yeux, ainsi que l'anaglyphe rouge-cyan.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2104=Ce JPEG est sans perte : il n'a donc pas de place pour le descripteur 3D, car la section JPS suit la table de quantification, et un JPEG sans perte n'en a pas.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2105=sView n'a pas pu relire {0} pour y écrire la disposition 3D.\nVotre choix reste associé à ce fichier dans sView.
+2106=sView n'a pas pu écrire {0} : {1}.\nVérifiez que le fichier et son dossier sont accessibles en écriture, puis enregistrez à nouveau. Votre choix reste associé à ce fichier dans sView.
+2107=Un fichier PNG ne décrit, avec son bloc sTER, que des images côte à côte, dans l'un ou l'autre ordre des yeux : la disposition {0} ne peut donc pas y être écrite.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2108=Le bloc sTER ne peut pas décrire ce PNG tel quel : l'image fait {0} pixels de large, donc sa vue droite commence à la colonne {1}, alors que le bloc exige une colonne divisible par 8. D'autres programmes couperaient l'image au mauvais endroit.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2109=Le PNG ne marque que les images stéréo, avec le bloc sTER, et ce fichier n'en a aucun à retirer : une disposition 2D ne peut donc pas y être écrite.\nVotre choix reste associé à ce fichier dans sView.
+2110=sView n'a pas pu lire {0} comme un fichier PNG qu'il peut réécrire sans risque : le fichier est resté tel quel.\nVotre choix reste associé à ce fichier dans sView.
+2111=Le fichier porte maintenant la disposition 3D {0}.

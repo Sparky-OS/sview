@@ -13,3 +13,17 @@
 1463=Resolução própria da imagem
 1464=Configurações da tela...
 1465=Trocar os olhos esquerdo e direito
+1466=Não foi possível abrir as Configurações da tela: o kcmshell6 não pôde ser iniciado ({0}).\nAbra as Configurações do sistema e escolha Configurações da tela, onde estão o modo 3D e a troca dos olhos de cada tela.
+1467=As Configurações da tela fecharam com um erro (código de saída do kcmshell6: {0}).\nAbra as Configurações do sistema e escolha Configurações da tela, onde estão o modo 3D e a troca dos olhos de cada tela.
+2100=Este tipo de arquivo não tem lugar para o formato 3D. O sView grava o formato em arquivos JPEG, como descritor JPS, e em arquivos PNG, como bloco sTER.\nSua escolha continua guardada para este arquivo no sView.
+2101=Neste arquivo cada olho é uma imagem própria, e as etiquetas do próprio arquivo dão a ordem delas, que o sView não grava.\nSua escolha continua guardada para este arquivo no sView.
+2102=Este par vem de dois arquivos, então não há um único arquivo onde gravar o formato 3D.\nSua escolha continua guardada para estes arquivos no sView.
+2103=O descritor JPS não consegue descrever o formato {0}: ele descreve lado a lado, superior/inferior e linhas entrelaçadas, cada um em qualquer ordem dos olhos, e o anáglifo vermelho-ciano.\nSua escolha continua guardada para este arquivo no sView. O comando Media > Save Image As... salva o par como um novo arquivo JPS lado a lado.
+2104=Este JPEG é sem perdas, então não tem lugar para o descritor 3D: a seção JPS vem depois da tabela de quantização, e um JPEG sem perdas não tem nenhuma.\nSua escolha continua guardada para este arquivo no sView. O comando Media > Save Image As... salva o par como um novo arquivo JPS lado a lado.
+2105=O sView não conseguiu ler {0} de novo para gravar nele o formato 3D.\nSua escolha continua guardada para este arquivo no sView.
+2106=O sView não conseguiu gravar {0}: {1}.\nVerifique se o arquivo e a pasta dele podem ser gravados e salve de novo. Sua escolha continua guardada para este arquivo no sView.
+2107=Um arquivo PNG descreve, com seu bloco sTER, apenas imagens lado a lado, em qualquer ordem dos olhos, então o formato {0} não pode ser gravado nele.\nSua escolha continua guardada para este arquivo no sView. O comando Media > Save Image As... salva o par como um novo arquivo JPS lado a lado.
+2108=O bloco sTER não consegue descrever este PNG como ele está: a imagem tem {0} pixels de largura, então a vista direita começa na coluna {1}, e o bloco exige uma coluna divisível por 8. Outros programas dividiriam a imagem no lugar errado.\nSua escolha continua guardada para este arquivo no sView. O comando Media > Save Image As... salva o par como um novo arquivo JPS lado a lado.
+2109=O PNG marca só imagens estéreo, com o bloco sTER, e este arquivo não tem nenhum para remover, então um formato 2D não pode ser gravado nele.\nSua escolha continua guardada para este arquivo no sView.
+2110=O sView não conseguiu ler {0} como um arquivo PNG que possa regravar com segurança, então o arquivo ficou como estava.\nSua escolha continua guardada para este arquivo no sView.
+2111=O arquivo agora traz o formato 3D {0}.

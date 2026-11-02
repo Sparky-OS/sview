@@ -206,3 +206,17 @@
 1463=Eigene Auflösung des Bildes
 1464=Anzeige-Einrichtung...
 1465=Linkes und rechtes Auge tauschen
+1466=Die Anzeige-Einrichtung konnte nicht geöffnet werden: kcmshell6 ließ sich nicht starten ({0}).\nÖffnen Sie die Systemeinstellungen und wählen Sie Anzeige-Einrichtung; dort sind der 3D-Modus und der Augentausch jedes Bildschirms.
+1467=Die Anzeige-Einrichtung wurde mit einem Fehler beendet (Exit-Code von kcmshell6: {0}).\nÖffnen Sie die Systemeinstellungen und wählen Sie Anzeige-Einrichtung; dort sind der 3D-Modus und der Augentausch jedes Bildschirms.
+2100=Dieser Dateityp hat keinen Platz für eine 3D-Anordnung. sView schreibt die Anordnung in JPEG-Dateien als JPS-Deskriptor und in PNG-Dateien als sTER-Chunk.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
+2101=In dieser Datei ist jedes Auge ein eigenes Bild, und ihre Reihenfolge steht in den eigenen Tags der Datei, die sView nicht schreibt.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
+2102=Dieses Paar stammt aus zwei Dateien, daher gibt es keine einzelne Datei, in die die 3D-Anordnung geschrieben werden kann.\nIhre Auswahl bleibt in sView für diese Dateien gespeichert.
+2103=Der JPS-Deskriptor kann die Anordnung {0} nicht beschreiben: Er beschreibt nebeneinander, übereinander und zeilenweise verschachtelt, jeweils in beliebiger Augenreihenfolge, sowie die Rot-Cyan-Anaglyphe.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2104=Dieses JPEG ist verlustfrei und hat daher keinen Platz für den 3D-Deskriptor: Der JPS-Abschnitt folgt auf die Quantisierungstabelle, und ein verlustfreies JPEG hat keine.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2105=sView konnte {0} nicht erneut lesen, um die 3D-Anordnung hineinzuschreiben.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
+2106=sView konnte {0} nicht schreiben: {1}.\nPrüfen Sie, ob die Datei und ihr Ordner beschreibbar sind, und speichern Sie dann erneut. Ihre Auswahl bleibt in sView für diese Datei gespeichert.
+2107=Eine PNG-Datei beschreibt mit ihrem sTER-Chunk nur Bilder nebeneinander, in beliebiger Augenreihenfolge, daher kann die Anordnung {0} nicht hineingeschrieben werden.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2108=Der sTER-Chunk kann dieses PNG so nicht beschreiben: Das Bild ist {0} Pixel breit, seine rechte Ansicht beginnt also in Spalte {1}, und der Chunk verlangt eine durch 8 teilbare Spalte. Andere Programme würden das Bild an der falschen Stelle teilen.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2109=PNG kennzeichnet nur Stereobilder, mit dem sTER-Chunk, und diese Datei hat keinen, der entfernt werden könnte, daher kann keine 2D-Anordnung hineingeschrieben werden.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
+2110=sView konnte {0} nicht als PNG-Datei lesen, die sich sicher neu schreiben lässt, daher blieb die Datei unverändert.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
+2111=Die Datei enthält jetzt die 3D-Anordnung {0}.

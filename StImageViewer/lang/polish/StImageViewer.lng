@@ -13,3 +13,17 @@
 1463=Własna rozdzielczość obrazu
 1464=Ustawienia wyświetlania...
 1465=Zamień lewe i prawe oko
+1466=Nie można otworzyć modułu Ustawienia wyświetlania: nie udało się uruchomić kcmshell6 ({0}).\nOtwórz Ustawienia systemowe i wybierz Ustawienia wyświetlania, gdzie są tryb 3D i zamiana oczu każdego ekranu.
+1467=Moduł Ustawienia wyświetlania zakończył się błędem (kod wyjścia kcmshell6: {0}).\nOtwórz Ustawienia systemowe i wybierz Ustawienia wyświetlania, gdzie są tryb 3D i zamiana oczu każdego ekranu.
+2100=Ten typ pliku nie ma miejsca na układ 3D. sView zapisuje układ w plikach JPEG, jako deskryptor JPS, i w plikach PNG, jako fragment sTER.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
+2101=W tym pliku każde oko jest osobnym obrazem, a ich kolejność podają własne znaczniki pliku, których sView nie zapisuje.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
+2102=Ta para pochodzi z dwóch plików, więc nie ma jednego pliku, w którym można zapisać układ 3D.\nTwój wybór pozostaje zapamiętany dla tych plików w sView.
+2103=Deskryptor JPS nie potrafi opisać układu {0}: opisuje obrazy obok siebie, góra-dół i przeplot wierszy, każdy w dowolnej kolejności oczu, oraz anaglif czerwono-cyjanowy.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Polecenie Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2104=Ten plik JPEG jest bezstratny, więc nie ma miejsca na deskryptor 3D: sekcja JPS następuje po tablicy kwantyzacji, a bezstratny JPEG jej nie ma.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Polecenie Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2105=sView nie mógł ponownie odczytać pliku {0}, aby zapisać w nim układ 3D.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
+2106=sView nie mógł zapisać pliku {0}: {1}.\nSprawdź, czy plik i jego katalog można zapisywać, i zapisz ponownie. Twój wybór pozostaje zapamiętany dla tego pliku w sView.
+2107=Plik PNG opisuje fragmentem sTER tylko obrazy obok siebie, w dowolnej kolejności oczu, więc układu {0} nie można w nim zapisać.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Polecenie Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2108=Fragment sTER nie może opisać tego pliku PNG w obecnej postaci: obraz ma szerokość {0} pikseli, więc prawy widok zaczyna się w kolumnie {1}, a fragment wymaga kolumny podzielnej przez 8. Inne programy podzieliłyby obraz w złym miejscu.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Polecenie Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2109=PNG oznacza fragmentem sTER tylko obrazy stereo, a ten plik nie ma go do usunięcia, więc nie można w nim zapisać układu 2D.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
+2110=sView nie mógł odczytać pliku {0} jako PNG, który można bezpiecznie przepisać, więc plik pozostał bez zmian.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView.
+2111=Plik zawiera teraz układ 3D {0}.
