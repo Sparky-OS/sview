@@ -285,7 +285,7 @@
 1465=Échanger les yeux gauche et droit
 1466=Impossible d'ouvrir la Configuration de l'affichage : kcmshell6 n'a pas pu être lancé ({0}).\nOuvrez la Configuration du système et choisissez Configuration de l'affichage, où se trouvent le mode 3D et l'échange des yeux de chaque écran.
 1467=La Configuration de l'affichage s'est fermée sur une erreur (code de sortie de kcmshell6 : {0}).\nOuvrez la Configuration du système et choisissez Configuration de l'affichage, où se trouvent le mode 3D et l'échange des yeux de chaque écran.
-2100=sView écrit la disposition 3D dans les fichiers Matroska et WebM, comme StereoMode, et dans les fichiers MP4 et MOV, comme boîte st3d. Un fichier au format {0} n'a pas de telle place.\nVotre choix reste associé à ce fichier dans sView. Une copie remultiplexée en Matroska, par exemple avec MKVToolNix, peut porter la disposition.
+2100=sView écrit la disposition 3D dans les fichiers Matroska et WebM, comme StereoMode, et dans les fichiers MP4 et MOV, comme boîte st3d. Un fichier au format {0} n'a pas de place pour cela.\nVotre choix reste associé à ce fichier dans sView. Une copie remultiplexée en Matroska, par exemple avec MKVToolNix, peut porter la disposition.
 2101=Cette vidéo n'est pas un fichier local : sView ne peut donc pas y écrire.\nVotre choix lui reste associé dans sView.
 2102=Le StereoMode de Matroska n'a pas de valeur pour la disposition {0}.\nVotre choix reste associé à ce fichier dans sView.
 2103=WebM n'admet comme StereoMode que le mono, le côte à côte et le dessus/dessous, dans l'un ou l'autre ordre des yeux : la disposition {0} ne peut donc pas être écrite dans ce fichier WebM.\nVotre choix reste associé à ce fichier dans sView. Une copie de la vidéo au format Matroska (.mkv) peut la porter.
