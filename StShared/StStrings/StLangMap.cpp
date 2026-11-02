@@ -25,7 +25,12 @@ namespace {
 }
 
 StLangMap::StLangMap()
+#ifdef ST_HAVE_STEREO_KWIN
+// a text the chosen translation lacks is shown in English, as gettext falls back to it, without its id
+: myToShowId(false) {
+#else
 : myToShowId(true) {
+#endif
     //
 }
 
