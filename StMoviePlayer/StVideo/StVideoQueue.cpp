@@ -1106,13 +1106,13 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
             theIsStarted = false;
         }
 
-        // simple one-stream case; the stream's own eye order applies unless the user chose the format
-        const bool isRightFirst = myIsFrameSeqRightFirst && myStFormatByUser == StFormat_AUTO;
+        // simple one-stream case
         if(aSrcFormat == StFormat_FrameSequence) {
             const bool isSecondFrame = !isOddNumber(myFramesCounter);
             if(!isSecondFrame) {
                 myCachedFrame.fill(myDataAdp, false);
-            } else if(isRightFirst) {
+            } else if(myIsFrameSeqRightFirst) {
+                // the stream starts each pair with the right view
                 pushFrame(myDataAdp, myCachedFrame, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
             } else {
                 pushFrame(myCachedFrame, myDataAdp, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
@@ -1122,7 +1122,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
             // this is counter-efficient - it is better requesting single view
             // within "view_ids" decoder context when displaying MONO
             const bool isSecondFrame = !isOddNumber(myFramesCounter);
-            if(isSecondFrame == isRightFirst) {
+            if(isSecondFrame == myIsFrameSeqRightFirst) {
                 // the left view
                 pushFrame(myDataAdp, myEmptyImage, thePacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
             }
