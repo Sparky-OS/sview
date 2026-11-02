@@ -1,3 +1,38 @@
+sview (26.9+stereo3d4) UNRELEASED; urgency=medium
+
+  * ORDER 349b: sView says why, in nine languages, and the movie player
+    offers to save the person's correction into the file.
+  * The language follows the environment on Linux (LC_ALL, LC_MESSAGES,
+    LANG, then LANGUAGE): the C library's locale stayed "C", so a person
+    with pt_BR, pl, ja or any other locale saw English. Portuguese,
+    Polish and Japanese are matched to their translations; Chinese keeps
+    its territory.
+  * Display Configuration...: a missing kcmshell6, or one that ends with
+    an error or a crash, is said, with System Settings > Display
+    Configuration as the place to go (without kcm_kscreen, kcmshell6
+    shows its own message). kcmshell6 comes from
+    libkf6kcmutils-bin, not kde-cli-tools, and the shortcut is a
+    designed option, so libkf6kcmutils-bin and kscreen are Depends.
+  * Image viewer: every refusal to save the layout into the file says
+    why and what to do (a layout the JPS descriptor cannot describe, a
+    lossless JPEG, a file type with no place for it, an MPO, a pair from
+    two files, a failed read or write with the system's reason), and a
+    saved layout is confirmed. PNG files take the layout in the sTER
+    chunk (PNG Extensions 1.4.0, 3.6), side by side in either eye order,
+    when the picture splits in its middle on a column divisible by 8;
+    other layouts and widths are refused with the reason.
+  * Movie player: the file information dialog and Shift+I offer to save
+    the layout into Matroska and WebM (StereoMode, RFC 9559, with
+    mkvpropedit) and MP4 and MOV (st3d, Spherical Video V2) files; then
+    the per-file choices go back to unmarked and the file is opened
+    again. Nothing is written when the stream declares another layout
+    itself, and the file is read back and put back as it was when it
+    does not show the layout. Every refusal says why. mkvtoolnix is a
+    Depends.
+  * The new messages in en, pl, pt_BR, fr, de, ja, ko, zh_CN and zh_TW.
+
+ -- Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>  Mon, 02 Nov 2026 22:00:00 +0000
+
 sview (26.9+stereo3d3) UNRELEASED; urgency=medium
 
   * ORDER 349: the two corrections found in review of the upstream patches
