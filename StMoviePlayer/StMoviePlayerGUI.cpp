@@ -1171,7 +1171,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
             aText->setTextColor(anExtraColor);
             aText->stglInitAutoHeightWidth(aTextMaxWidth);
         }
-        if(hasCorrection(*anExtraInfo, *aParams) && !anExtraInfo->IsSavable) {
+        if(isSaveOffered(*anExtraInfo, *aParams) && !anExtraInfo->IsSavable) {
             // the layout cannot be saved into this file: say why instead of offering it
             StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
             StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
@@ -1219,8 +1219,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     }
 
     if(anExtraInfo->IsSavable
-    && anExtraInfo->HasVideo
-    && hasCorrection(*anExtraInfo, *aParams)) {
+    && isSaveOffered(*anExtraInfo, *aParams)) {
         // offer to write the person's correction into the file
         StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
         aSaveBtn->setUserData(1);
@@ -1231,11 +1230,18 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     setModalDialog(aDialog);
 }
 
-bool StMoviePlayerGUI::hasCorrection(const StMovieInfo& theInfo, const StStereoParams& theParams) {
+bool StMoviePlayerGUI::isSaveOffered(const StMovieInfo& theInfo, const StStereoParams& theParams) const {
+#ifdef ST_HAVE_STEREO_KWIN
+    if(!myPlugin->params.ToEnable3D->getValue()) {
+        return false;
+    }
+#endif
     const StFormat anActiveFormat = theParams.ToSwapLR ? st::formatReversed(theParams.StereoFormat) : theParams.StereoFormat;
-    if(theInfo.StInfoStream == StFormat_AUTO) {
-        return anActiveFormat != StFormat_Mono
-            && anActiveFormat != StFormat_SeparateFrames;
+    if(!theInfo.HasVideo
+    || anActiveFormat == StFormat_Mono
+    || anActiveFormat == StFormat_AUTO
+    || anActiveFormat == StFormat_SeparateFrames) {
+        return false;
     } else if(theInfo.StInfoStream == StFormat_FrameSequence && anActiveFormat == StFormat_FrameSequence) {
         // a frame sequence keeps its format when swapped: the eye order is the correction
         return theParams.ToSwapLR;
@@ -1261,7 +1267,12 @@ void StMoviePlayerGUI::doSaveFileInfoBegin(const size_t ) {
     const StFormat anActiveSrcFormat = aParams->ToSwapLR
                                      ? st::formatReversed(aParams->StereoFormat)
                                      : aParams->StereoFormat;
-    if(!anExtraInfo->IsSavable) {
+    if(!isSaveOffered(*anExtraInfo, *aParams)) {
+        // a video shown in 2D, or one shown as its file says: no layout to save
+        anExtraInfo.reset();
+        myPlugin->myMsgQueue->pushInfo(tr(DIALOG_NOTHING_TO_SAVE));
+        return;
+    } else if(!anExtraInfo->IsSavable) {
         myPlugin->myMsgQueue->pushInfo(anExtraInfo->FormatName.isEmpty() || StFileNode::isFileExists(anExtraInfo->VideoPath)
                                      ? tr(SAVE_VIDEO_CONTAINER).format(anExtraInfo->FormatLongName)
                                      : tr(SAVE_VIDEO_NOT_LOCAL));

@@ -143,9 +143,10 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doSaveFileInfoBegin(const size_t );
 
     /**
-     * Return true when the layout shown differs from what the file declares, so there is a correction to save.
+     * Return true when saving the 3D layout into the file is offered: the video is shown in 3D and the layout
+     * shown differs from the file's own mark (a correction for 3D is not offered on 2D content).
      */
-    ST_LOCAL static bool hasCorrection(const StMovieInfo& theInfo, const StStereoParams& theParams);
+    ST_LOCAL bool isSaveOffered(const StMovieInfo& theInfo, const StStereoParams& theParams) const;
 
         private: //! @name desktop interface creation routines
 

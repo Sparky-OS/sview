@@ -949,6 +949,11 @@ void StImageViewer::doSaveImageInfoBegin(const size_t ) {
         myMsgQueue->pushInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_FILE_NOINFO));
         myFileInfo.reset();
         return;
+    } else if(!isSaveOffered(*myFileInfo, *aParams)) {
+        // a picture shown in 2D, or one shown as its file says: no layout to save
+        myMsgQueue->pushInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_NOTHING_TO_SAVE));
+        myFileInfo.reset();
+        return;
     } else if(!myFileInfo->IsSavable) {
         myMsgQueue->pushInfo(myLangMap->getValue(myFileInfo->UnsavableReason != 0
                                                ? myFileInfo->UnsavableReason
@@ -977,6 +982,21 @@ void StImageViewer::doSaveImageInfoBegin(const size_t ) {
 
     aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_CANCEL));
     aDialog->stglInit();
+}
+
+bool StImageViewer::isSaveOffered(const StImageInfo& theInfo, const StStereoParams& theParams) const {
+#ifdef ST_HAVE_STEREO_KWIN
+    if(!params.ToEnable3D->getValue()) {
+        return false;
+    }
+#endif
+    const StFormat anActiveSrcFormat = theParams.ToSwapLR ? st::formatReversed(theParams.StereoFormat) : theParams.StereoFormat;
+    if(anActiveSrcFormat == StFormat_Mono
+    || anActiveSrcFormat == StFormat_AUTO
+    || anActiveSrcFormat == StFormat_SeparateFrames) {
+        return false;
+    }
+    return theInfo.StInfoStream != anActiveSrcFormat;
 }
 
 void StImageViewer::doDeleteFileBegin(const size_t ) {

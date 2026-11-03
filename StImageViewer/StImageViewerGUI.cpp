@@ -759,12 +759,13 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     }
     aTable->updateLayout();
 
+    const bool isSaveOffered = myPlugin->isSaveOffered(*anExtraInfo, *aParams);
     if(anExtraInfo->IsSavable
-    && !aSrcInfo.isEmpty()) {
+    && isSaveOffered) {
         StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
         aSaveBtn->setUserData(1);
         aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doSaveImageInfo);
-    } else if(!aSrcInfo.isEmpty()) {
+    } else if(isSaveOffered) {
         // the layout cannot be saved into this file: say why instead of offering it
         StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
         StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));

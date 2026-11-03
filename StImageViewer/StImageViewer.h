@@ -99,6 +99,12 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
     ST_LOCAL void doSaveImageInfo(const size_t theToSave);
     ST_LOCAL void doSaveImageInfoBegin(const size_t dummy = 0);
+
+    /**
+     * Return true when saving the 3D layout into the file is offered: the picture is shown in 3D and the layout
+     * shown differs from the file's own mark (a correction for 3D is not offered on 2D content).
+     */
+    ST_LOCAL bool isSaveOffered(const StImageInfo& theInfo, const StStereoParams& theParams) const;
     ST_LOCAL void doAboutImage(const size_t dummy = 0);
     ST_LOCAL void doListFirst(const size_t dummy = 0);
     ST_LOCAL void doListPrev(const size_t dummy = 0);
