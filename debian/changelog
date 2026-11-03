@@ -31,6 +31,11 @@ sview (26.9+stereo3d4) UNRELEASED; urgency=medium
     itself, and the file is read back and put back as it was when it
     does not show the layout. Every refusal says why. mkvtoolnix is a
     Depends.
+  * Both players offer the save only for a correction shown in 3D: the
+    layout shown differs from the file's own mark and is not 2D. On 2D
+    content, or with nothing corrected, Shift+I says "Nothing to save!"
+    and writes nothing (a correction for 3D is not offered on 2D
+    content).
   * The new messages in en, pl, pt_BR, fr, de, ja, ko, zh_CN and zh_TW.
 
  -- Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>  Mon, 02 Nov 2026 22:00:00 +0000
