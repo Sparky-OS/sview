@@ -26,6 +26,8 @@
 #include <StAV/StAVImage.h>
 #include <StImage/StPngStereo.h>
 #include <StFile/StRawFile.h>
+#include <StFile/StFileTransaction.h>
+#include <StImage/StPictureCorrection.h>
 #include <StThreads/StThread.h>
 
 #include <cerrno>
@@ -371,6 +373,23 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
                 anEntry.changeValue() = aTime;
             }
         }
+        stereo_jpeg_info aMpoInfo;
+        bool isMpoPair = stereo_jpeg_inspect(aParser.getBuffer(), aParser.getSize(), &aMpoInfo) == STEREO_JPEG_OK
+                     && aMpoInfo.layout == 5 && !aMpoInfo.lossless && theSource->size() < 2;
+        if(isMpoPair) {
+            std::shared_ptr<StJpegParser::Image> aViews[2];
+            for(std::shared_ptr<StJpegParser::Image> aView = aParser.getImage(0); aView; aView = aView->Next) {
+                for(size_t i = 0; i < 2; ++i) {
+                    if(aView->Data == aParser.getBuffer() + aMpoInfo.image_offset[i]) { aViews[i] = aView; }
+                }
+            }
+            isMpoPair = aViews[0] && aViews[1];
+            if(isMpoPair) {
+                anImg1 = aViews[aMpoInfo.right_first ? 1 : 0];
+                anImg2 = aViews[aMpoInfo.right_first ? 0 : 1];
+                anImgInfo->ImageType = StImageFile::ST_TYPE_MPO;
+            }
+        }
         if (theParams->InputFormat == StFormat_AUTO) {
             if (aParser.getSrcFormat() != StFormat_AUTO) {
                 aSrcFormatCurr = aParser.getSrcFormat();
@@ -387,11 +406,11 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
             return false;
         }
 
-        anImgInfo->IsSavable = anImg2.get() == nullptr && theSource->size() < 2;
-        if (anImg2.get() != nullptr) {
-            anImgInfo->UnsavableReason = StImageViewerStrings::SAVE_INFO_SEPARATE_PICTURES;
+        anImgInfo->IsSavable = ((anImgType != StImageFile::ST_TYPE_MPO && anImg2.get() == nullptr) || isMpoPair) && theSource->size() < 2;
+        if (anImg2.get() != nullptr || anImgType == StImageFile::ST_TYPE_MPO) {
+            anImgInfo->UnsavableReason = StImageViewerStrings::SAVE_INFO_MPO_METADATA;
         }
-        anImgInfo->StInfoStream = aParser.getSrcFormat();
+        anImgInfo->StInfoStream = isMpoPair ? StFormat_SeparateFrames : aParser.getSrcFormat();
         if (anImgInfo->StInfoStream != StFormat_AUTO) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
             anEntry.changeValue() = tr(StImageViewerGUI::trSrcFormatId(anImgInfo->StInfoStream));
@@ -792,31 +811,56 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
      || theInfo->ImageType == StImageFile::ST_TYPE_PNS) {
         return savePngInfo(theInfo, aSrcFormat, aLayoutName);
     } else if (theInfo->ImageType != StImageFile::ST_TYPE_JPEG
-            && theInfo->ImageType != StImageFile::ST_TYPE_JPS) {
+            && theInfo->ImageType != StImageFile::ST_TYPE_JPS
+            && theInfo->ImageType != StImageFile::ST_TYPE_MPO) {
         myMsgQueue->pushError(tr(SAVE_INFO_FILE_TYPE));
         return false;
     }
 
-    if(!StJpegParser::isJpsFormat(aSrcFormat)) {
+    if(theInfo->ImageType != StImageFile::ST_TYPE_MPO && !StJpegParser::isJpsFormat(aSrcFormat)) {
         // the descriptor would declare the picture monoscopic
         myMsgQueue->pushError(tr(SAVE_INFO_JPS_LAYOUT).format(aLayoutName));
         return false;
     }
 
-    StJpegParser aParser;
-    if(!aParser.readFile(theInfo->Path)) {
-        myMsgQueue->pushError(tr(SAVE_INFO_READ_FAILED).format(theInfo->Path));
+    const bool isMpo = theInfo->ImageType == StImageFile::ST_TYPE_MPO;
+    StFileTransaction aTransaction(theInfo->Path);
+    if(!aTransaction.isValid()) {
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, aTransaction.error()));
         return false;
     }
-
-    if(!aParser.setupJps(aSrcFormat)
-    && aParser.getSrcFormat() != aSrcFormat) {
-        // the JPS section could not be added (it is placed after the quantization table, which a lossless JPEG lacks)
-        myMsgQueue->pushError(tr(SAVE_INFO_JPEG_LOSSLESS));
+    std::vector<stUByte_t> aCandidate, aRead;
+    if(isMpo) {
+        stereo_jpeg_info anInfo;
+        if(stereo_jpeg_inspect(aTransaction.original().data(), aTransaction.original().size(), &anInfo) || anInfo.layout != 5) {
+            myMsgQueue->pushError(tr(SAVE_INFO_MPO_METADATA));
+            return false;
+        }
+    }
+    const int aResult = StPictureCorrection::prepare(aTransaction.original(), aSrcFormat,
+                                                     isMpo && theInfo->Id->ToSwapLR, aCandidate);
+    if(aResult != STEREO_JPEG_OK) {
+        const size_t aReason = aResult == STEREO_JPEG_LOSSLESS ? SAVE_INFO_LOSSLESS_VERIFY
+                             : aResult == STEREO_JPEG_MPO ? SAVE_INFO_MPO_METADATA
+                             : aResult == STEREO_JPEG_GEOMETRY ? SAVE_INFO_JPS_GEOMETRY
+                             : aResult == STEREO_JPEG_INVALID ? SAVE_INFO_JPEG_INVALID
+                             : aResult == STEREO_JPEG_TRAILING ? SAVE_INFO_JPEG_TRAILING
+                             : aResult == STEREO_JPEG_LAYOUT && isMpo ? SAVE_INFO_MPO_LAYOUT
+                             : SAVE_INFO_JPS_METADATA;
+        myMsgQueue->pushError(tr(aReason));
         return false;
     }
-    if(!aParser.saveFile(theInfo->Path)) {
-        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, StString(strerror(errno))));
+    if(!aTransaction.write(aCandidate)) {
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, aTransaction.error()));
+        return false;
+    }
+    if(!aTransaction.readBack(aRead) || aRead != aCandidate
+    || !StPictureCorrection::verify(aTransaction.original(), aRead, aSrcFormat, isMpo && theInfo->Id->ToSwapLR)) {
+        myMsgQueue->pushError(tr(SAVE_INFO_READ_BACK));
+        return false;
+    }
+    if(!aTransaction.commit(aRead)) {
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, aTransaction.error()));
         return false;
     }
     myMsgQueue->pushInfo(tr(SAVE_INFO_SAVED).format(aLayoutName));
@@ -826,15 +870,15 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
 bool StImageLoader::savePngInfo(const std::shared_ptr<StImageInfo>& theInfo,
                                 const StFormat  theFormat,
                                 const StString& theLayoutName) {
-    StRawFile aFile;
-    if(!aFile.readFile(theInfo->Path)) {
-        myMsgQueue->pushError(tr(SAVE_INFO_READ_FAILED).format(theInfo->Path));
+    StFileTransaction aTransaction(theInfo->Path);
+    if(!aTransaction.isValid()) {
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, aTransaction.error()));
         return false;
     }
-
+    const std::vector<stUByte_t>& anOriginal = aTransaction.original();
     std::vector<stUByte_t> aResult;
     uint32_t aWidth = 0;
-    switch(StPngStereo::setupSter(aFile.getBuffer(), aFile.getSize(), theFormat, aResult, aWidth)) {
+    switch(StPngStereo::setupSter(anOriginal.data(), anOriginal.size(), theFormat, aResult, aWidth)) {
         case StPngStereo::Result_Written:
             break;
         case StPngStereo::Result_Unchanged:
@@ -855,13 +899,19 @@ bool StImageLoader::savePngInfo(const std::shared_ptr<StImageInfo>& theInfo,
             return false;
     }
 
-    aFile.freeBuffer();
-    StRawFile anOutput;
-    anOutput.wrapBuffer(aResult.data(), aResult.size());
-    const bool isSaved = anOutput.saveFile(theInfo->Path);
-    const int anError = errno;
-    if(!isSaved) {
-        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, StString(strerror(anError))));
+    std::vector<stUByte_t> aRead;
+    if(!aTransaction.write(aResult)) {
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, aTransaction.error()));
+        return false;
+    }
+    const StFormat aWritten = theFormat == StFormat_Mono ? StFormat_AUTO : theFormat;
+    if(!aTransaction.readBack(aRead) || aRead != aResult || StPngStereo::readSter(aRead.data(), aRead.size()) != aWritten
+    || !StPictureCorrection::samePixels(anOriginal, aRead, StImageFile::ST_TYPE_PNG)) {
+        myMsgQueue->pushError(tr(SAVE_INFO_READ_BACK));
+        return false;
+    }
+    if(!aTransaction.commit(aRead)) {
+        myMsgQueue->pushError(tr(SAVE_INFO_WRITE_FAILED).format(theInfo->Path, aTransaction.error()));
         return false;
     }
     myMsgQueue->pushInfo(tr(SAVE_INFO_SAVED).format(theLayoutName));
@@ -904,10 +954,7 @@ void StImageLoader::mainLoop() {
                 // the file now carries the layout, so the per-file packing is cleared before the file is read again;
                 // the eye swap is cleared only when the saved layout carries it (a red-cyan anaglyph has no
                 // reversed layout to write, so its swap stays with the file's other per-file choices)
-                anInfo->Id->InputFormat = StFormat_AUTO;
-                if(st::formatReversed(anInfo->Id->StereoFormat) != anInfo->Id->StereoFormat) {
-                    anInfo->Id->setSwapLR(false);
-                }
+                StPictureCorrection::clearSaved(*anInfo->Id, anInfo->ImageType == StImageFile::ST_TYPE_MPO);
                 // re-load image file
             }
             ST_FALLTHROUGH

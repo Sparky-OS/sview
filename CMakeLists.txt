@@ -417,6 +417,8 @@ function (sview_set_target_output_dirs theTarget)
 endfunction()
 
 # core libraries
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(STEREO_POLICY REQUIRED IMPORTED_TARGET stereo-policy>=1.17.6)
 if (USE_STEREO_KWIN)
   if (NOT USE_XLIB)
     message(FATAL_ERROR "Stereo KWin output requires X11/XWayland")

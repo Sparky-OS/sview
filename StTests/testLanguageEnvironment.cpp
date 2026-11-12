@@ -16,6 +16,7 @@ int main() {
         { NULL,          NULL,          "pl_PL.UTF-8", NULL,       "pl" },
         { NULL,          NULL,          "fr_CA.UTF-8", NULL,       "fr" },
         { NULL,          NULL,          "de_DE.UTF-8", NULL,       "de" },
+        { NULL,          NULL,          "es_MX.UTF-8", NULL,       "es" },
         { NULL,          NULL,          "ja_JP.UTF-8", NULL,       "ja" },
         { NULL,          NULL,          "ko_KR.UTF-8", NULL,       "ko" },
         { NULL,          NULL,          "zh_CN.UTF-8", NULL,       "zh" },

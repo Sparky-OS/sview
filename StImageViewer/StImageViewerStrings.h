@@ -198,6 +198,14 @@ namespace StImageViewerStrings {
         SAVE_INFO_PNG_MONO          = 2109,
         SAVE_INFO_NOT_PNG           = 2110,
         SAVE_INFO_SAVED             = 2111,
+        SAVE_INFO_MPO_METADATA      = 2112,
+        SAVE_INFO_JPS_METADATA      = 2113,
+        SAVE_INFO_READ_BACK         = 2114,
+        SAVE_INFO_MPO_LAYOUT        = 2115,
+        SAVE_INFO_JPS_GEOMETRY      = 2116,
+        SAVE_INFO_JPEG_INVALID      = 2117,
+        SAVE_INFO_JPEG_TRAILING     = 2118,
+        SAVE_INFO_LOSSLESS_VERIFY   = 2119,
 
         // About dialog
         ABOUT_DPLUGIN_NAME     = 3000,

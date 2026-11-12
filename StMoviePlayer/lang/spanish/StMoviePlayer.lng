@@ -267,3 +267,19 @@
 6059=Activar/Desactivar modo panorámico
 6060=Activar/Desactivar modo teatro
 6061=Mostrar/ocultar GUI
+
+2100=sView guarda la disposición 3D en Matroska y WebM, como StereoMode, y MP4 y MOV, como caja st3d. El formato {0} no tiene ese campo.\nSu elección se conserva en sView. Una copia remultiplexada a Matroska, por ejemplo con MKVToolNix, puede conservar la disposición.
+2101=La disposición solo se puede guardar en un archivo local.\nGuarde primero una copia local. Su elección se conserva en sView.
+2102=La disposición {0} no tiene un valor en StereoMode de Matroska.\nSu elección se conserva para este archivo en sView.
+2103=WebM solo permite los valores 0, 1, 2, 3 y 11 de StereoMode y no puede describir la disposición {0}.\nSu elección se conserva en sView. Una copia Matroska (.mkv) puede conservar la disposición.
+2104=La caja st3d de MP4 puede indicar mono, paralelo o superior/inferior con el ojo izquierdo primero. FFmpeg, que usan sView y la mayoría de reproductores Linux, no lee su valor derecha-izquierda, por lo que no se puede guardar la disposición {0}.\nSu elección se conserva en sView. Una copia Matroska (.mkv) puede conservar la disposición.
+2105=Este MP4 tiene el índice antes de los datos de vídeo y no hay espacio libre a continuación, por lo que no se puede añadir st3d sin reescribir el archivo completo, algo que sView no hace.\nSu elección se conserva para este archivo en sView.
+2106=Esta pista de vídeo MP4 tiene varias descripciones de muestra y sView solo guarda st3d en pistas con una.\nSu elección se conserva para este archivo en sView.
+2107=No se pudo leer la estructura de {0} de forma segura. El archivo se conserva sin cambios.\nSu elección se conserva para este archivo en sView.
+2108=Para guardar en Matroska y WebM se necesita mkvpropedit, de MKVToolNix, que no está instalado.\nInstale el paquete mkvtoolnix y vuelva a guardar. Su elección se conserva en sView.
+2109=No se pudo guardar {0}: {1}.\nCompruebe los permisos y el espacio disponible, y vuelva a guardar. Su elección se conserva en sView.
+2110=El propio flujo de vídeo declara la disposición {0}, que tiene prioridad sobre la marca del contenedor. Cambiar solo el contenedor no puede corregirla.\nSu elección se conserva en sView. Cree una copia con una declaración del flujo corregida.
+2111=La lectura del archivo guardado no confirmó la disposición {0}; se conservó el archivo original.\nSu elección se conserva en sView. Compruebe el archivo y vuelva a guardar.
+2112=El archivo ahora contiene la disposición 3D {0}.
+2113=Guardar la disposición 3D en el archivo
+2114=¿Guardar la disposición 3D {0} en este archivo?

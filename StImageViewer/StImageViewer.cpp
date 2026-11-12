@@ -991,6 +991,9 @@ bool StImageViewer::isSaveOffered(const StImageInfo& theInfo, const StStereoPara
     }
 #endif
     const StFormat anActiveSrcFormat = theParams.ToSwapLR ? st::formatReversed(theParams.StereoFormat) : theParams.StereoFormat;
+    if(anActiveSrcFormat == StFormat_SeparateFrames && theInfo.ImageType == StImageFile::ST_TYPE_MPO) {
+        return theParams.ToSwapLR;
+    }
     if(anActiveSrcFormat == StFormat_Mono
     || anActiveSrcFormat == StFormat_AUTO
     || anActiveSrcFormat == StFormat_SeparateFrames) {

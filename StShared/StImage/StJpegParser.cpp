@@ -4,9 +4,11 @@
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
 
+#include <cstring>
 #include <cstdio> // forward-declared to work-around broken MinGW headers
 
 #include <StImage/StJpegParser.h>
+#include <StImage/StPictureCorrection.h>
 #include <StImage/StExifTags.h>
 
 #include <StStrings/StLogger.h>
@@ -621,68 +623,14 @@ bool StJpegParser::isJpsFormat(const StFormat theFormat) {
 }
 
 bool StJpegParser::setupJps(const StFormat theFormat) {
-    if(myBuffer == NULL
-    || !isJpsFormat(theFormat)) {
-        return false;
-    }
-
-    if(myOffsets[Offset_Jps] == 0) {
-        if(myOffsets[Offset_Dqt] == 0) {
-            return false;
-        }
-
-        // insert section right after DQT
-        const StCString THE_APP_DESC = stCString("Written by sView");
-        const uint16_t  aDqtLen  = StAlienData::Get16uBE(myBuffer + myOffsets[Offset_Dqt] + 2);
-        const ptrdiff_t anOffset = myOffsets[Offset_Dqt] + aDqtLen + 2;
-        const uint16_t  aJpsLen  = 16 + 2 + ((uint16_t )THE_APP_DESC.Size + 1);
-        if(!insertSection(M_APP3, aJpsLen, anOffset)) {
-            return false;
-        }
-
-        myOffsets[Offset_Jps] = anOffset;
-        stUByte_t* aData = myBuffer + anOffset + 2;
-        stMemCpy(aData + 2, "_JPSJPS_", 8);
-        StAlienData::Set16uBE(aData + 10, 4);
-        StAlienData::Set32uBE(aData + 12, 0);
-        StAlienData::Set16uBE(aData + 16, (uint16_t )THE_APP_DESC.Size);
-        stMemCpy(aData + 18, THE_APP_DESC.String, THE_APP_DESC.Size + 1);
-    } else if(myStFormat == theFormat) {
-        return false;
-    }
-
-    myStFormat = theFormat;
-    uint32_t aStereoDesc = 0x00000001;
-    switch(theFormat) {
-        case StFormat_SideBySide_LR:
-            aStereoDesc |= SD_LAYOUT_SIDEBYSIDE | SD_LEFT_FIELD_FIRST;
-            break;
-        case StFormat_SideBySide_RL:
-            aStereoDesc |= SD_LAYOUT_SIDEBYSIDE;
-            break;
-        case StFormat_TopBottom_LR:
-            aStereoDesc |= SD_LAYOUT_OVERUNDER | SD_LEFT_FIELD_FIRST;
-            break;
-        case StFormat_TopBottom_RL:
-            aStereoDesc |= SD_LAYOUT_OVERUNDER;
-            break;
-        case StFormat_Rows:
-            aStereoDesc |= SD_LAYOUT_INTERLEAVED | SD_LEFT_FIELD_FIRST;
-            break;
-        case StFormat_Rows_RL:
-            aStereoDesc |= SD_LAYOUT_INTERLEAVED;
-            break;
-        case StFormat_AnaglyphRedCyan:
-            aStereoDesc |= SD_LAYOUT_ANAGLYPH;
-            break;
-        case StFormat_Mono:
-        default:
-            aStereoDesc = 0x00000000;
-            break;
-    }
-
-    StAlienData::Set32uBE(myBuffer + myOffsets[Offset_Jps] + 2 + 8 + 2 + 2, aStereoDesc);
-    return true;
+    if(myBuffer == NULL || !isJpsFormat(theFormat)) { return false; }
+    std::vector<stUByte_t> anOriginal(myBuffer, myBuffer + getSize()), aCandidate;
+    if(StPictureCorrection::prepare(anOriginal, theFormat, false, aCandidate) != STEREO_JPEG_OK
+    || aCandidate == anOriginal) { return false; }
+    initBuffer(aCandidate.size());
+    std::memcpy(myBuffer, aCandidate.data(), aCandidate.size());
+    myLength = aCandidate.size();
+    return parse();
 }
 
 StJpegParser::Image::Image()

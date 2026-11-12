@@ -8,7 +8,11 @@
 #include <StAV/stAV.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StRawFile.h>
+#include <StFile/StFileTransaction.h>
 #include <StThreads/StProcess.h>
+extern "C" {
+#include <libavutil/hash.h>
+}
 
 #if defined(__linux__) && !defined(__ANDROID__)
     #include <cerrno>
@@ -167,45 +171,43 @@ namespace {
             && (theFormat1 != StFormat_FrameSequence || theIsRightFirst1 == theIsRightFirst2);
     }
 
-    /**
-     * The StereoMode value FFmpeg read from the file's Matroska track, -1 when the element is absent.
-     */
-    static int readMatroskaValue(const StString& thePath, const int theStreamIndex) {
+    // Metadata edits must preserve all compressed packets and codec configuration.
+    static bool mediaDigest(const StString& thePath, std::vector<stUByte_t>& theDigest) {
         AVFormatContext* aCtx = NULL;
-        if(avformat_open_input(&aCtx, thePath.toCString(), NULL, NULL) < 0) {
-            return -1;
-        }
-        int aValue = -1;
-        if(theStreamIndex >= 0 && theStreamIndex < int(aCtx->nb_streams)) {
-            AVStream* aStream = aCtx->streams[theStreamIndex];
-            StString aTag;
-            static const char* THE_NAMES[15] = {
-                "mono", "left_right", "bottom_top", "top_bottom", "checkerboard_rl", "checkerboard_lr",
-                "row_interleaved_rl", "row_interleaved_lr", "col_interleaved_rl", "col_interleaved_lr",
-                "anaglyph_cyan_red", "right_left", "anaglyph_green_magenta", "block_lr", "block_rl"
-            };
-            if(stAV::meta::readTag(aStream, stCString("STEREO_MODE"), aTag)) {
-                for(int aNameIter = 0; aNameIter < 15; ++aNameIter) {
-                    if(aTag == StString(THE_NAMES[aNameIter])) {
-                        aValue = aNameIter;
-                        break;
-                    }
-                }
-            } else {
-                // FFmpeg tags every value but 0, mono, which it gives as side data only
-            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 29, 100))
-                const AVPacketSideData* aSideData = av_packet_side_data_get(aStream->codecpar->coded_side_data,
-                                                                            aStream->codecpar->nb_coded_side_data,
-                                                                            AV_PKT_DATA_STEREO3D);
-                if(aSideData != NULL && ((const AVStereo3D* )aSideData->data)->type == AV_STEREO3D_2D) {
-                    aValue = 0;
-                }
-            #endif
+        AVHashContext* aHash = NULL;
+        if(avformat_open_input(&aCtx, thePath.toCString(), NULL, NULL) < 0) { return false; }
+        bool isOk = avformat_find_stream_info(aCtx, NULL) >= 0 && av_hash_alloc(&aHash, "sha256") >= 0;
+        if(isOk) {
+            av_hash_init(aHash);
+            for(unsigned i = 0; i < aCtx->nb_streams; ++i) {
+                const AVCodecParameters* aCodec = aCtx->streams[i]->codecpar;
+                stUByte_t header[12];
+                writeU32BE(header, i);
+                writeU32BE(header + 4, uint32_t(aCodec->codec_id));
+                writeU32BE(header + 8, uint32_t(aCodec->extradata_size));
+                av_hash_update(aHash, header, sizeof(header));
+                if(aCodec->extradata_size > 0) { av_hash_update(aHash, aCodec->extradata, size_t(aCodec->extradata_size)); }
             }
+            AVPacket* aPacket = av_packet_alloc();
+            if(aPacket == NULL) { isOk = false; }
+            int aResult = 0;
+            while(isOk && (aResult = av_read_frame(aCtx, aPacket)) >= 0) {
+                stUByte_t header[8];
+                writeU32BE(header, uint32_t(aPacket->stream_index));
+                writeU32BE(header + 4, uint32_t(aPacket->size));
+                av_hash_update(aHash, header, sizeof(header));
+                av_hash_update(aHash, aPacket->data, size_t(aPacket->size));
+                av_packet_unref(aPacket);
+            }
+            isOk = isOk && aResult == AVERROR_EOF;
+            if(isOk) { theDigest.resize(32); av_hash_final_bin(aHash, theDigest.data(), theDigest.size()); }
+            av_packet_free(&aPacket);
         }
+        av_hash_freep(&aHash);
         avformat_close_input(&aCtx);
-        return aValue;
+        return isOk;
     }
+
 
 }
 
@@ -484,15 +486,6 @@ bool StVideoStereoMark::readLayout(const StString& thePath,
 #if defined(__linux__) && !defined(__ANDROID__)
 namespace {
 
-    /**
-     * The bytes of a file region, to put back.
-     */
-    struct StFileRegion {
-        off_t                  Offset;
-        std::vector<stUByte_t> Data;
-        off_t                  FileSize;
-    };
-
     static bool readAt(const int theFd, const off_t theOffset, stUByte_t* theData, const size_t theSize) {
         size_t aDone = 0;
         while(aDone < theSize) {
@@ -523,25 +516,13 @@ namespace {
         return true;
     }
 
-    static bool restoreRegion(const StString& thePath, const StFileRegion& theRegion) {
-        const int aFd = ::open(thePath.toCString(), O_WRONLY);
-        if(aFd < 0) {
-            return false;
-        }
-        bool isDone = writeAt(aFd, theRegion.Offset, theRegion.Data.data(), theRegion.Data.size())
-                   && ::ftruncate(aFd, theRegion.FileSize) == 0
-                   && ::fsync(aFd) == 0;
-        isDone = ::close(aFd) == 0 && isDone;
-        return isDone;
-    }
-
     /**
      * Write st3d into the file's moov box, in place: the box keeps its offset, so every chunk offset
      * of the media data stays valid. A moov box that grows must be the file's last box or be followed
      * by a free space box ('free' or 'skip') with room for the 13 bytes.
      */
     static StVideoStereoMark::Result writeMp4(const StString& thePath, const uint32_t theTrackId, const int theMode,
-                                              StFileRegion& theBackup, StString& theDetails) {
+                                              StString& theDetails) {
         const int aFd = ::open(thePath.toCString(), O_RDWR);
         if(aFd < 0) {
             theDetails = StString(strerror(errno));
@@ -634,21 +615,14 @@ namespace {
             }
         }
 
-        theBackup.Offset   = aMoovOffset;
-        theBackup.FileSize = aFileSize;
-        const size_t anOldBytes = size_t(stMin(off_t(aRegion.size()), aFileSize - aMoovOffset));
-        theBackup.Data.resize(anOldBytes);
-        if(!readAt(aFd, aMoovOffset, theBackup.Data.data(), anOldBytes)) {
-            theDetails = StString(strerror(errno));
-            ::close(aFd);
-            return StVideoStereoMark::Result_WriteFailed;
-        }
         bool isWritten = writeAt(aFd, aMoovOffset, aRegion.data(), aRegion.size()) && ::fsync(aFd) == 0;
+        std::vector<stUByte_t> aRead(aRegion.size());
+        isWritten = isWritten && readAt(aFd, aMoovOffset, aRead.data(), aRead.size()) && aRead == aRegion;
+        if(!isWritten && errno == 0) { errno = EIO; }
         const int anError = errno;
         isWritten = ::close(aFd) == 0 && isWritten;
         if(!isWritten) {
             theDetails = StString(strerror(anError));
-            restoreRegion(thePath, theBackup);
             return StVideoStereoMark::Result_WriteFailed;
         }
         return StVideoStereoMark::Result_Written;
@@ -735,9 +709,15 @@ StVideoStereoMark::Result StVideoStereoMark::save(const Request& theRequest,
         return Result_Unchanged;
     }
 
+    std::vector<stUByte_t> anOriginalMedia;
+    if(!mediaDigest(theRequest.Path, anOriginalMedia)) { return Result_Broken; }
+    StFileTransaction aTransaction(theRequest.Path, false);
+    if(!aTransaction.isValid()) {
+        theDetails = aTransaction.error();
+        return Result_WriteFailed;
+    }
+    const StString& aTemporary = aTransaction.temporaryPath();
     Result aResult = Result_Broken;
-    StFileRegion aBackup;
-    int anOldValue = -1;
     if(aContainer == Container_Mp4) {
         AVFormatContext* aCtx = NULL;
         int aTrackId = -1;
@@ -751,29 +731,29 @@ StVideoStereoMark::Result StVideoStereoMark::save(const Request& theRequest,
         if(aTrackId <= 0) {
             return Result_Broken;
         }
-        aResult = writeMp4(theRequest.Path, uint32_t(aTrackId), aValue, aBackup, theDetails);
+        aResult = writeMp4(aTemporary, uint32_t(aTrackId), aValue, theDetails);
         if(aResult == Result_Unchanged) {
             return Result_Unchanged;
         }
     } else {
-        anOldValue = readMatroskaValue(theRequest.Path, theRequest.StreamIndex);
-        aResult = runMkvpropedit(theRequest.Path, theRequest.VideoTrack, aValue, theDetails);
+        aResult = runMkvpropedit(aTemporary, theRequest.VideoTrack, aValue, theDetails);
     }
     if(aResult != Result_Written) {
         return aResult;
     }
 
-    // the file must read back with the layout, as the player reads it; otherwise it is put back as it was
-    if(!readLayout(theRequest.Path, theRequest.StreamIndex, false, aFormat, isRightFirst)
+    // Only a verified temporary copy may replace the person's file.
+    if(!readLayout(aTemporary, theRequest.StreamIndex, false, aFormat, isRightFirst)
     || !isSameLayout(aFormat, isRightFirst, theRequest.Format, theRequest.IsRightFirst)) {
-        StString aDummy;
-        if(aContainer == Container_Mp4) {
-            restoreRegion(theRequest.Path, aBackup);
-        } else {
-            runMkvpropedit(theRequest.Path, theRequest.VideoTrack, anOldValue, aDummy);
-        }
         theDeclared = aFormat;
         return Result_ReadBack;
+    }
+    std::vector<stUByte_t> aSavedMedia;
+    if(!mediaDigest(aTemporary, aSavedMedia) || aSavedMedia != anOriginalMedia) { return Result_ReadBack; }
+    if(!aTransaction.seal()) { return Result_ReadBack; }
+    if(!aTransaction.commit()) {
+        theDetails = aTransaction.error();
+        return Result_WriteFailed;
     }
     return Result_Written;
 #else

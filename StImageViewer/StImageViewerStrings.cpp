@@ -335,6 +335,22 @@ void loadDefaults(StLangMap& theStrings) {
                "Your choice stays with this file in sView.");
     theStrings(SAVE_INFO_SAVED,
                "The file now carries the 3D layout {0}.");
+    theStrings(SAVE_INFO_MPO_METADATA,
+               "This MPO is not a complete indexed two-view disparity pair with valid viewpoint and base-viewpoint fields. The original file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_JPS_METADATA,
+               "The JPS descriptor is invalid or ambiguous, or contains fields that cannot be preserved safely. The original file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_READ_BACK,
+               "The temporary picture did not read back with the chosen layout and eyes. The original file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_MPO_LAYOUT,
+               "MPO stores separate disparity views and cannot describe the chosen packing. The original file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_JPS_GEOMETRY,
+               "The chosen JPS packing and separation do not fit the stored pixel dimensions. The original file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_JPEG_INVALID,
+               "The JPEG segments or scan data are truncated or invalid. The original file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_JPEG_TRAILING,
+               "The JPEG has unindexed trailing data whose offsets cannot be preserved by a metadata-only save. The original file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
+    theStrings(SAVE_INFO_LOSSLESS_VERIFY,
+               "Lossless JPEG cannot yet be verified by the picture reader; the file was kept.\nYour choice stays with this file in sView. Media > Save Image As... saves the pair as a new side by side JPS file.");
     theStrings(DIALOG_NO_SNAPSHOT,
                "Snapshot not available!");
     theStrings(DIALOG_SAVE_SNAPSHOT,

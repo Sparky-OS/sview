@@ -38,3 +38,13 @@
 1139=Anáglifo amarelo/azul
 1142=2 fluxos
 2011=Nada para salvar!
+
+2112=Este MPO não é um par completo e indexado de duas vistas com disparidade e campos válidos de ponto de vista e vista base. O arquivo original foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.
+2113=O descritor JPS é inválido, ambíguo ou contém campos que não podem ser preservados com segurança. O arquivo original foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.
+2114=A releitura da imagem temporária não confirmou o formato e as vistas dos olhos escolhidos. O arquivo original foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.
+2115=O MPO armazena vistas separadas com disparidade e não pode descrever o formato escolhido. O arquivo original foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.
+2116=O formato JPS e a separação escolhidos não correspondem às dimensões dos pixels armazenados. O arquivo original foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.
+2117=Os segmentos JPEG ou os dados das varreduras estão truncados ou são inválidos. O arquivo original foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.
+2118=O JPEG tem dados finais não indexados cujas posições não podem ser preservadas ao salvar apenas os metadados. O arquivo original foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.
+
+2119=O leitor de imagens ainda não pode verificar JPEG sem perdas; o arquivo foi mantido.\nSua escolha continua guardada para este arquivo no sView. Mídia > Salvar imagem como... salva o par em um novo arquivo JPS lado a lado.

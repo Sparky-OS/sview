@@ -1,3 +1,18 @@
+sview (26.9+stereo3d5) UNRELEASED; urgency=medium
+
+  * Save JPEG/JPS corrections through libstereo-policy's Qt-free JPEG
+    codec; retain descriptor fields and opaque trailing data. Support
+    indexed two-view MPO eye-order corrections and reload the saved order.
+  * Write JPEG, JPS, MPO, PNG, Matroska and MP4 corrections to a sibling
+    temporary file, verify metadata and image/packet content, then replace
+    the unchanged original. Preserve file permissions and extended attributes.
+  * Keep the 3D-only offer and per-file reset rules. Translate new refusal
+    reasons into ten languages and complete Spanish's existing save reasons.
+  * Exercise real files, independent parsers, corrupting editors, failed
+    read-back and the actual MPO loader/save path in headless build tests.
+
+ -- Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>  Thu, 12 Nov 2026 01:00:00 +0000
+
 sview (26.9+stereo3d4) UNRELEASED; urgency=medium
 
   * ORDER 349b: sView says why, in nine languages, and the movie player

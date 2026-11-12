@@ -190,3 +190,26 @@
 6044=Activar/Desactivar modo panorámico
 6045=Activar/Desactivar modo teatro
 6046=Mostrar/ocultar GUI
+
+2112=Este MPO no es un par completo e indexado de dos vistas con disparidad y campos válidos de punto de vista y vista base. Se conservó el archivo original.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2113=El descriptor JPS no es válido, es ambiguo o contiene campos que no se pueden conservar de forma segura. Se conservó el archivo original.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2114=La lectura de la imagen temporal no confirmó la disposición ni las vistas de los ojos elegidas. Se conservó el archivo original.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2115=MPO almacena vistas separadas con disparidad y no puede describir la disposición elegida. Se conservó el archivo original.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2116=La disposición JPS y la separación elegidas no se ajustan a las dimensiones de los píxeles almacenados. Se conservó el archivo original.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2117=Los segmentos JPEG o los datos de los barridos están truncados o no son válidos. Se conservó el archivo original.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2118=El JPEG contiene datos finales sin indexar cuyas posiciones no se pueden conservar al guardar solo los metadatos. Se conservó el archivo original.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+
+2100=Este tipo de archivo no tiene un campo para una disposición 3D. sView guarda la disposición en archivos JPEG, como descriptor JPS, y PNG, como bloque sTER.\nSu elección se conserva para este archivo en sView.
+2101=Este archivo contiene varias imágenes y no se puede cambiar su disposición con este guardado.\nSu elección se conserva para este archivo en sView.
+2102=Este par procede de dos archivos separados, por lo que no hay un solo archivo donde guardar la disposición.\nSu elección se conserva en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2103=El descriptor JPS no puede describir la disposición {0}.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2104=Un JPEG sin pérdidas no tiene una tabla de cuantificación después de la cual sView pueda insertar la sección JPS. El archivo se conserva sin cambios.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2105=No se pudo leer {0}. El archivo se conserva sin cambios.\nCompruebe que el archivo existe y se puede leer, y vuelva a guardar. Su elección se conserva en sView.
+2106=No se pudo guardar {0}: {1}.\nCompruebe los permisos y el espacio disponible, y vuelva a guardar. Su elección se conserva en sView.
+2107=El bloque sTER de PNG solo describe imágenes en paralelo, en cualquiera de los dos órdenes de ojos; no puede describir la disposición {0}.\nSu elección se conserva en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2108=El bloque sTER no puede describir este PNG tal como está: tiene {0} píxeles de ancho y la vista derecha empieza en la columna {1}, pero se requiere una columna divisible por 8. Otros programas dividirían la imagen en un lugar incorrecto.\nSu elección se conserva en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.
+2109=PNG solo marca imágenes estéreo mediante sTER y este archivo no tiene ningún bloque que eliminar, por lo que no se puede guardar una disposición 2D.\nSu elección se conserva para este archivo en sView.
+2110=sView no pudo leer {0} como un PNG que pueda modificar de forma segura. El archivo se conserva sin cambios.\nSu elección se conserva para este archivo en sView.
+2111=El archivo ahora contiene la disposición 3D {0}.
+
+2119=El lector de imágenes aún no puede verificar JPEG sin pérdida; se conservó el archivo.\nSu elección se conserva para este archivo en sView. Medios > Guardar imagen como... guarda el par en un nuevo archivo JPS en paralelo.

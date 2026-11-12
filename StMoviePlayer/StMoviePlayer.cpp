@@ -16,6 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <StImage/StPictureCorrection.h>
 #include "StMoviePlayer.h"
 #ifdef ST_HAVE_STEREO_KWIN
 #include "../StOutStereoKWin/StOutStereoKWin.h"
@@ -2461,11 +2462,7 @@ void StMoviePlayer::saveFileInfo(const std::shared_ptr<StMovieInfo>& theInfo) {
 
     // the file carries the layout now: the per-file packing goes back to unmarked, and so does the swap
     // when the written layout carries the eye order (a red-cyan anaglyph has no reversed value)
-    aParams->InputFormat = StFormat_AUTO;
-    if(st::formatReversed(aParams->StereoFormat) != aParams->StereoFormat
-    || aParams->StereoFormat == StFormat_FrameSequence) {
-        aParams->setSwapLR(false);
-    }
+    StPictureCorrection::clearSaved(*aParams, aParams->StereoFormat == StFormat_FrameSequence);
     params.SrcStereoFormat->setValue(StFormat_AUTO);
     myMsgQueue->pushInfo(tr(StMoviePlayerStrings::SAVE_VIDEO_SAVED).format(aLayoutName));
 

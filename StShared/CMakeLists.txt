@@ -14,6 +14,7 @@ set (USED_SRCFILES
   StFile/StFileNode2.cpp
   StFile/StFolder.cpp
   StFile/StRawFile.cpp
+  StFile/StFileTransaction.cpp
   StFT/StFTFont.cpp
   StFT/StFTFontRegistry.cpp
   StFT/StFTLibrary.cpp
@@ -49,6 +50,7 @@ set (USED_SRCFILES
   StImage/StImagePlane.cpp
   StImage/StJpegParser.cpp
   StImage/StPngStereo.cpp
+  StImage/StPictureCorrection.cpp
   StImage/StNsImage.cpp
   StImage/StStbImage.cpp
   StImage/StWicImage.cpp
@@ -290,3 +292,5 @@ endif()
 if (USE_LIBCONFIG)
   target_link_libraries (${PROJECT_NAME} PRIVATE libconfig++)
 endif()
+
+target_link_libraries (${PROJECT_NAME} PUBLIC PkgConfig::STEREO_POLICY)

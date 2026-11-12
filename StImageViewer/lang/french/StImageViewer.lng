@@ -220,3 +220,13 @@
 2109=Le PNG ne marque que les images stéréo, avec le bloc sTER, et ce fichier n'en a aucun à retirer : une disposition 2D ne peut donc pas y être écrite.\nVotre choix reste associé à ce fichier dans sView.
 2110=sView n'a pas pu lire {0} comme un fichier PNG qu'il peut réécrire sans risque : le fichier est resté tel quel.\nVotre choix reste associé à ce fichier dans sView.
 2111=Le fichier porte maintenant la disposition 3D {0}.
+
+2112=Ce MPO n’est pas une paire complète et indexée de deux vues à disparité avec des champs de point de vue et de vue de base valides. Le fichier original a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2113=Le descripteur JPS est invalide, ambigu ou contient des champs qui ne peuvent pas être conservés en toute sécurité. Le fichier original a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2114=La relecture de l’image temporaire n’a pas confirmé la disposition et les vues des yeux choisies. Le fichier original a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2115=MPO stocke des vues à disparité séparées et ne peut pas décrire la disposition choisie. Le fichier original a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2116=La disposition JPS et l’écart choisis ne correspondent pas aux dimensions des pixels stockés. Le fichier original a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2117=Les segments JPEG ou les données des balayages sont tronqués ou invalides. Le fichier original a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+2118=Le JPEG contient des données finales non indexées dont les positions ne peuvent pas être conservées en enregistrant uniquement les métadonnées. Le fichier original a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.
+
+2119=Le lecteur d’images ne peut pas encore vérifier le JPEG sans perte ; le fichier a été conservé.\nVotre choix reste associé à ce fichier dans sView. Média > Enregistre Image Sous.. enregistre la paire dans un nouveau fichier JPS côte à côte.

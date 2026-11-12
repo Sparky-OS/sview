@@ -1,14 +1,19 @@
 Source: sview
 Section: contrib/video
 Priority: optional
-Maintainer: Kirill Gavrilov <kirill@sview.ru>
-Build-Depends: debhelper (>= 13), pkgconf, libstereo-declare-dev (>= 1.6.0), g++ (>= 4.0), cmake, ninja-build, libopenal-dev, libgl-dev, libxrandr-dev, libxpm-dev, libavcodec-dev, libavdevice-dev, libavformat-dev, libavutil-dev, libswscale-dev, libconfig++-dev, libfontconfig-dev, libfreetype-dev, libxpm-dev
+Maintainer: Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>
+Original-Maintainer: Kirill Gavrilov <kirill@sview.ru>
+Build-Depends: libstereo-policy-dev (>= 1.17.6), python3, ffmpeg, mkvtoolnix, debhelper (>= 13), pkgconf, libstereo-declare-dev (>= 1.6.0), g++ (>= 4.0), cmake, ninja-build, libopenal-dev, libgl-dev, libxrandr-dev, libxpm-dev, libavcodec-dev, libavdevice-dev, libavformat-dev, libavutil-dev, libswscale-dev, libconfig++-dev, libfontconfig-dev, libfreetype-dev, libxpm-dev
 Standards-Version: 3.9.1
-Homepage: http://www.sview.ru
+Homepage: https://sparkylinux.org
+Bugs: https://github.com/Sparky-OS/sparky-stereo-os/issues
 
 Package: sview
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, xdg-utils, zenity, libkf6kcmutils-bin, kscreen, mkvtoolnix
+Depends: libstereo-policy1 (>= 1.17.6), ${shlibs:Depends}, ${misc:Depends}, xdg-utils, zenity, libkf6kcmutils-bin, kscreen, mkvtoolnix
 Description: stereoscopic media player sView
  sView is a stereoscopic Image Viewer and Movie Player.
  Relies on OpenGL for rendering and OpenAL for sound output.
+ .
+ Sparky Stereo OS, Daniel Ramos's (Capitain Jack) edition of SparkyLinux
+ (https://sparkylinux.org, by Paweł "pavroo" Pijanowski).

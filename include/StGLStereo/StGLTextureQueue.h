@@ -26,6 +26,7 @@
  * to display.
  */
 class StGLTextureQueue {
+    friend struct StMpoLoaderTest;
 
         public:
 

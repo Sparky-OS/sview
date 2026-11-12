@@ -53,6 +53,7 @@ struct StImageInfo {
  * Auxiliary class to load images from dedicated thread.
  */
 class StImageLoader {
+    friend struct StMpoLoaderTest;
 
         public:
 

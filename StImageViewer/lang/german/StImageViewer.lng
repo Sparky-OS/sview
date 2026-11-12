@@ -220,3 +220,13 @@
 2109=PNG kennzeichnet nur Stereobilder, mit dem sTER-Chunk, und diese Datei hat keinen, der entfernt werden könnte, daher kann keine 2D-Anordnung hineingeschrieben werden.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
 2110=sView konnte {0} nicht als PNG-Datei lesen, die sich sicher neu schreiben lässt, daher blieb die Datei unverändert.\nIhre Auswahl bleibt in sView für diese Datei gespeichert.
 2111=Die Datei enthält jetzt die 3D-Anordnung {0}.
+
+2112=Diese MPO-Datei ist kein vollständiges indiziertes Disparitätsbildpaar mit gültigen Blickpunkt- und Basisblickpunktfeldern. Die Originaldatei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2113=Der JPS-Deskriptor ist ungültig, mehrdeutig oder enthält Felder, die nicht sicher erhalten werden können. Die Originaldatei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2114=Das erneute Lesen des temporären Bildes bestätigte die gewählte Anordnung und die Augenansichten nicht. Die Originaldatei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2115=MPO speichert getrennte Disparitätsansichten und kann die gewählte Anordnung nicht beschreiben. Die Originaldatei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2116=Die gewählte JPS-Anordnung und der Abstand passen nicht zu den gespeicherten Pixelmaßen. Die Originaldatei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2117=Die JPEG-Segmente oder Scandaten sind abgeschnitten oder ungültig. Die Originaldatei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+2118=Das JPEG enthält nicht indizierte Daten am Ende, deren Positionen beim reinen Speichern der Metadaten nicht erhalten werden können. Die Originaldatei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.
+
+2119=Der Bildleser kann verlustfreies JPEG noch nicht überprüfen; die Datei wurde beibehalten.\nIhre Auswahl bleibt in sView für diese Datei gespeichert. Medien > Bild speichern als... speichert das Paar als neue JPS-Datei nebeneinander.

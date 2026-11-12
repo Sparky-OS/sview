@@ -38,3 +38,13 @@
 1139=Anaglif żółto-niebieski
 1142=2 strumienie
 2011=Nie ma nic do zapisania!
+
+2112=Ten MPO nie jest pełną indeksowaną parą dwóch widoków z paralaksą i prawidłowymi polami numeru widoku oraz widoku bazowego. Oryginalny plik został zachowany.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2113=Deskryptor JPS jest nieprawidłowy, niejednoznaczny lub zawiera pola, których nie można bezpiecznie zachować. Oryginalny plik został zachowany.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2114=Ponowny odczyt tymczasowego obrazu nie potwierdził wybranego układu i widoków oczu. Oryginalny plik został zachowany.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2115=MPO przechowuje oddzielne widoki z paralaksą i nie może opisać wybranego układu. Oryginalny plik został zachowany.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2116=Wybrany układ JPS i odstęp nie pasują do zapisanych wymiarów obrazu. Oryginalny plik został zachowany.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2117=Segmenty JPEG lub dane skanów są ucięte albo nieprawidłowe. Oryginalny plik został zachowany.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+2118=JPEG ma nieindeksowane dane końcowe, których położeń nie można zachować przy zapisie samych metadanych. Oryginalny plik został zachowany.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
+
+2119=Czytnik obrazów nie potrafi jeszcze zweryfikować bezstratnego JPEG; zachowano plik.\nTwój wybór pozostaje zapamiętany dla tego pliku w sView. Media > Save Image As... zapisuje parę jako nowy plik JPS obok siebie.
