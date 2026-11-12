@@ -2,7 +2,7 @@ Source: sview
 Section: contrib/video
 Priority: optional
 Maintainer: Daniel Ramos (Capitain Jack) <Capitain_Jack@yahoo.com>
-Original-Maintainer: Kirill Gavrilov <kirill@sview.ru>
+XSBC-Original-Maintainer: Kirill Gavrilov <kirill@sview.ru>
 Build-Depends: libstereo-policy-dev (>= 1.17.6), python3, ffmpeg, mkvtoolnix, debhelper (>= 13), pkgconf, libstereo-declare-dev (>= 1.6.0), g++ (>= 4.0), cmake, ninja-build, libopenal-dev, libgl-dev, libxrandr-dev, libxpm-dev, libavcodec-dev, libavdevice-dev, libavformat-dev, libavutil-dev, libswscale-dev, libconfig++-dev, libfontconfig-dev, libfreetype-dev, libxpm-dev
 Standards-Version: 3.9.1
 Homepage: https://sparkylinux.org
